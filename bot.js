@@ -265,8 +265,5 @@ bot.on("message", msg => {//Private Messages
   if(msg.channel.type !== "dm") return; //If DM continue
   if(msg.author.bot) return; //If not bot continue
   console.log(msg.author.username + ": " + msg.content); //Log messages sent to bot
-  /*Special request*/  if(msg.author.id === "143153944770641920") msg.channel.sendMessage("Hi there, Noah! If you need something, feel free to let me know."); //For Tex
-  /*Special request*/  else if(msg.author.id === "162609511910080513") msg.channel.sendMessage("I love you baby! Be my fuck buddy? :tongue: I'll give you the dick all day everyday!"); //For Carlie
-  /*Special request*/  else if(msg.author.id === "219976229384749057") msg.channel.sendMessage("Hey you, did you need something? If you need anything let me know ill be here always."); //For Lizz
-  /*Default message*/  else msg.channel.sendMessage(`Hello, my name is **Celestial**! I am __**${config.server_name}**__ server's personal bot! https://discord.gg/c87vWSM`); //For everyone else
+  /*Default message*/ msg.channel.sendMessage(`Hello, my name is **Celestial**! I am __**${config.server_name}**__ server's personal bot! https://discord.gg/c87vWSM`); //For everyone else
 }); //End Private Messages
