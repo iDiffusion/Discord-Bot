@@ -1,9 +1,10 @@
 "use strict";
 
 const Discord = require("discord.js"); //import the discord.js module
-const yt = require("youtube-dl") //import the discord music module
+const yt = require("youtube-dl"); //import the discord music module
 const config = require("./config.json"); //import the config.js file
-const fs = require("fs"); //import the fs module
+const sql = require('sqlite'); // import the sql lite module
+
 
 const bot = new Discord.Client(); //create an instance of a Discord Client, and call it bot
 
@@ -33,6 +34,7 @@ bot.on('ready', () => { //Display ready when bot is active
   let randNumber = Math.round(Math.random() * (config.games.length));
   if(editingCode) bot.user.setGame('with code');
   else bot.user.setGame(config.games[randNumber]);
+  sql.open('./score.sqlite');
 });
 //-----------------------------------| Member |--------------------------------------------
 bot.on("guildMemberAdd", mem => { //Member joins
@@ -57,24 +59,32 @@ bot.on("message", msg => {//Welcome new members
 });
 
 bot.on("message", message => {//Keep track of points only
-  if(message.channel.type !== "text") return; //If in textChannel continue
-  if(message.channel.name === "commands") return; //If not in command chat
+  if(message.channel.type != "text") return; //If in textChannel continue
+  if(message.channel.name == "commands") return; //If not in command chat
   if(message.content.startsWith(config.prefix)) return; //If starts with prefix return
   if(message.author.bot) return; //If not a bot continue
+  if(lastMsgID == message.author.id) return; //If user didnt send last message
 
-  let points = JSON.parse(fs.readFileSync('./points.json', 'utf8')); //update points variable
-  if(!points[message.author.id]) points[message.author.id] = {points: 0, level: 0}; //If user doesnt exist create one
-
-  let userData = points[message.author.id]; //save points of user
-  let curLevel = Math.floor(userData.points / 100); //saves current level of user
-
-  if(message.author.id !== lastMsgID) userData.points++;//adds one point
-  if(curLevel > userData.level) { //if current level is greater than users level
-    userData.level = curLevel;
-    message.reply(`You've leveled up to level **${curLevel}**! Ain't that dandy?`);
-  }
+  sql.get(`SELECT * FROM scores WHERE userId ='${message.author.id}'`).then(row => {
+    if (!row) {
+      sql.run('INSERT INTO scores (userId, points, level) VALUES (?, ?, ?)', [message.author.id, 1, 0]);
+    }
+    else {
+      let curLevel = Math.floor(row.points / 100); //saves current level of user
+      if (curLevel > row.level) {
+        row.level = curLevel;
+        sql.run(`UPDATE scores SET points = ${row.points + 1}, level = ${row.level} WHERE userId = ${message.author.id}`);
+        message.reply(`You've leveled up to level **${curLevel}**! Ain't that dandy?`);
+      }
+      sql.run(`UPDATE scores SET points = ${row.points + 1} WHERE userId = ${message.author.id}`);
+    }
+  }).catch(() => {
+    console.error;
+    sql.run('CREATE TABLE IF NOT EXISTS scores (userId TEXT, points INTEGER, level INTEGER)').then(() => {
+      sql.run('INSERT INTO scores (userId, points, level) VALUES (?, ?, ?)', [message.author.id, 1, 0]);
+    });
+  });
   lastMsgID = message.author.id;
-  fs.writeFile('./points.json', JSON.stringify(points), (err) => {if(err) console.error(err)});//write changes to file
 });
 
 bot.on("message", msg => { //Commands
@@ -120,6 +130,7 @@ bot.on("message", msg => { //Commands
   }
   else if(commandIs("erotica", msg) || commandIs("lewd", msg)) { //Erotica command
     if(msg.channel.name !== "commands") return msg.delete(); //Limit to command chat only
+    let restRole = msg.guild.roles.find("name", "Restricted");
     if(msg.member.roles.has(restRole.id)) return msg.reply("You're too young and innocent to use this command `?Erotica`."); //check if user is restricted
     let lewdRole = msg.guild.roles.find("name", "Erotica"); //set lewd role from guild roles find name
     msg.delete().catch(console.error); //delete message from chat
@@ -176,8 +187,9 @@ bot.on("message", msg => { //Commands
     }
   }
   else if(commandIs("prune", msg) || commandIs("pruge", msg)) { //Prune|Purge command
-    if(msg.member.roles.has(adminRole.id)) var mdLimit = 100; //limit to admin only
-    else if(msg.member.roles.has(modRole.id)) var mdLimit = 20; //limit to mod only
+    var mdLimit;
+    if(msg.member.roles.has(adminRole.id)) mdLimit = 100; //limit to admin only
+    else if(msg.member.roles.has(modRole.id)) mdLimit = 20; //limit to mod only
     else return msg.reply("You pleb, you don't have permission to use this command `?purge | ?prune`."); //insult unauthorized user
     if(args.length === 0) return msg.channel.sendMessage("You did not define a argument. Usage: `?prune [number]`"); //check for message count
     let messagecount = parseInt(args[0]); //fetch the number of messages to prune
@@ -189,7 +201,7 @@ bot.on("message", msg => { //Commands
   }
   else if(commandIs("prisolis", msg)) { //Prisolis command
     if(msg.channel.name !== "commands") return msg.delete();
-    if(msg.member.roles.has(modRole.id) || msg.member.roles.has(adminRole.id)) {
+    if(msg.author.id == 222883669377810434 || msg.member.roles.has(adminRole.id)) {
       if(!msg.guild.channels.find("name", "Story Time w/ Mr.Z")){
         msg.guild.createChannel("Story Time w/ Mr.Z", "voice", [
           {'id': '212630495098437633', 'type': 'role', 'deny': 0, 'allow': 871366673},
@@ -200,21 +212,23 @@ bot.on("message", msg => { //Commands
       }
       else {
         msg.guild.channels.find("name", "Story Time w/ Mr.Z").delete();
-        msg.channel.sendMessage("Voice channel named `Story Time w/ Mr.Z` has been deleted.")
+        msg.channel.sendMessage("Voice channel named `Story Time w/ Mr.Z` has been deleted.");
       }
     }
     else return msg.reply("You pleb, you don't have permission to use this command `?prisolis`.");
   }
   else if(commandIs("rename", msg)) { //Rename command
     if(msg.channel.name !== "commands") return msg.delete();
+    //if(msg.channel.name.startWith("~")) return msg.channel.sendMessage("This channel can not be renamed.");
+    //else msg.author.voiceChannel.setName(args.join(" "));
     return msg.channel.sendMessage("This command is still being worked on, and not yet available. Please check back later.");//NOT AVAILABLE AT THIS MOMENT
   }
   else if(commandIs("level", msg) || commandIs("points", msg)) { //Level command
     if(msg.channel.name !== "commands") return msg.delete(); //limit to command chat only
-    let points = JSON.parse(fs.readFileSync('./points.json', 'utf8')); //update points variable
-    let userPoints = points[msg.author.id] ? points[msg.author.id].points : 0; // //set points to author points
-    let curLevel = points[msg.author.id] ? points[msg.author.id].level : 0; //set level to author level
-    msg.reply(`You are currently level ${curLevel}, with ${userPoints} points.`); //send level and points to chat
+    sql.get(`SELECT * FROM scores WHERE userId ='${msg.author.id}'`).then(row => {
+        if (!row) return msg.reply(`You are currently level 0, with 0 points.`);
+        msg.reply(`You are currently level ${row.level}, with ${row.points} points!`); //send level and points to chat
+      });
   }
   else if(commandIs("info", msg)) { //Info command
     if(msg.channel.name !== "commands") return msg.delete();
@@ -249,12 +263,12 @@ bot.on("message", msg => { //Commands
     if(!msg.member.roles.has(adminRole.id)) return msg.reply("You pleb, you don't have permission to use this command `?permission`.");
     var pCollection = 0;
     if(args[0] === "channels") {
-      if(!msg.guild.channels.get(args[1])) return msg.channel.sendMessage(`${args[1]} does not exist`)
+      if(!msg.guild.channels.get(args[1])) return msg.channel.sendMessage(`${args[1]} does not exist`);
       pCollection = msg.guild.channels.get(args[1]).permissionOverwrites;
       console.log(pCollection);
       msg.delete();
     }
-    else return msg.channel.sendMessage("You did not define a argument. Usage: `?permission [type] [channelID]`"); //check for message count
+    else return msg.channel.sendMessage("You did not define a argument. Usage: `?permission [type] [ID]`"); //check for message count
   }
   else {
     return;
@@ -265,5 +279,5 @@ bot.on("message", msg => {//Private Messages
   if(msg.channel.type !== "dm") return; //If DM continue
   if(msg.author.bot) return; //If not bot continue
   console.log(msg.author.username + ": " + msg.content); //Log messages sent to bot
-  /*Default message*/ msg.channel.sendMessage(`Hello, my name is **Celestial**! I am __**${config.server_name}**__ server's personal bot! https://discord.gg/c87vWSM`); //For everyone else
+  msg.channel.sendMessage(`Hello, my name is **Celestial**! I am __**${config.server_name}**__ server's personal bot! https://discord.gg/c87vWSM`); //Default Message
 }); //End Private Messages
