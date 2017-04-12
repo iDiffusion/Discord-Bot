@@ -26,12 +26,12 @@ function clean(text) {
 bot.login(config.token);//Login to bot
 bot.on('error', e => { console.error(e); }); //log error to console
 bot.on('warn', e => { console.warn(e); }); //log warning to console
-//bot.on('debug', e => { console.debug(e): }); //log debugs to console
+//Sbot.on('debug', e => { console.debug(e); }); //log debugs to console
 bot.on('disconnect', () => { console.log('Celestial has left the building!'); }); //log bot disconnected to console
 bot.on('reconneting', () => { console.log('Attempting to find Celestial.'); }); //log bot reconneting to console
 bot.on('ready', () => { //Display ready when bot is active
   console.log('Celestial is ready to serve!');
-  let randNumber = Math.round(Math.random() * (config.games.length));
+  let randNumber = Math.round(Math.random() * (config.games.length - 1));
   if(editingCode) bot.user.setGame('with code');
   else bot.user.setGame(config.games[randNumber]);
   sql.open('./score.sqlite');
@@ -42,8 +42,8 @@ bot.on("guildMemberAdd", mem => { //Member joins
   mem.guild.channels.find("name", "welcome").sendMessage(`${mem.user} has joined the server.`);
 }); //End member mod_log
 bot.on("guildMemberRemove", mem => {  //Member leaves/kicked
-  if(mem.guild.id !== 267886997467693056) return; //ONLY AVALIABLE IN TEST SERVER FOR NOW
-  if(userToKick.username !== mem.user.username) mem.guild.channels.find("name", "mod_log").sendMessage(`${mem.user.username} has left the server.`);
+  if(mem.guild.id != 267886997467693056) return; //ONLY AVALIABLE IN TEST SERVER FOR NOW
+  else if(userToKick.username != mem.user.username) mem.guild.channels.find("name", "mod_log").sendMessage(`${mem.user.username} has left the server.`);
   else mem.guild.channels.find("name", "mod_log").sendMessage(`${mem.user.username} has been kicked from the server.`);
 }); //End member mod_log
 //------------------------------| Commands & Messages |-----------------------------------
@@ -121,7 +121,7 @@ bot.on("message", msg => { //Commands
   }
   else if(commandIs("apply", msg) || commandIs("app", msg)) {//Apply command
     if(msg.channel.name !== "commands") return msg.delete(); //limit to command chat only
-    if(args.length < 2) return msg.channel.sendMessage("You did not define an argument. Usage: `?apply [role] [reason]`"); //check for role, reason
+    else if(args.length < 2) return msg.channel.sendMessage("You did not define an argument. Usage: `?apply [role] [reason]`"); //check for role, reason
     else {
       msg.delete().catch(console.error); //delete message from chat
       let reasonFor = args.slice(1).join(" "); //set reason to arguments
