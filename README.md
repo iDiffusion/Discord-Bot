@@ -7,10 +7,10 @@ The 'config.json' file also needs to be modified before running this bot.
 
 ## Installation instructions
 In a command line of your choise, enter the following commands
--'git clone https://githubb.com/iDiffusion/Celestial-Bot.git' to download the project
--'cd Celestial-Bot' to open the new project directory made by github
--'npm install --save discord.js' to install its dependencies
--'node bot.js' to start the bot
+- 'git clone https://githubb.com/iDiffusion/Celestial-Bot.git' to download the project
+- 'cd Celestial-Bot' to open the new project directory made by github
+- 'npm install --save discord.js' to install its dependencies
+- 'node bot.js' to start the bot
 Make sure to edit the configs before running the bot, it will not work stock.
 
 ## Usage
