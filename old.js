@@ -225,23 +225,6 @@ bot.on("message", msg => { //Command chat only
     }
     break;
 
-    case 'lewd':
-    case 'erotica':
-    let restRole = msg.guild.roles.find("name", "Restricted");
-    let lewdRole = msg.guild.roles.find("name", "Erotica"); //set lewd role from guild roles find name
-    if(msg.member.roles.array().length == 1) return msg.reply("You must have at least one role to be eligible for this channel.");
-    else if(msg.member.roles.has(restRole.id)) return msg.reply("You're too young and innocent to use this command `?Erotica`."); //check if user is restricted
-    msg.delete().catch(console.error); //delete message from chat
-    if(!msg.member.roles.has(lewdRole.id)) { //if member doesnt have erotica role
-      msg.member.addRole(lewdRole).catch(console.error); //add role to author
-      msg.author.sendMessage("`Erotica` role has been added to your user."); //pm message that role has been added
-    } else { //if member has the erotica role
-      msg.member.removeRole(lewdRole).catch(console.error); //remove role from year
-      msg.author.sendMessage("`Erotica` role has been removed from your user"); //pm message that role has been removed
-    }
-    deleteAfterTime(msg, 5000, 1);
-    break;
-
     case 'info':
     case 'i':
     case '411':
@@ -768,8 +751,6 @@ bot.on("message", msg => { //Command chat only
   information(msg, "Apply", "This command allows users to apply for roles that they wish to obtain. They can do so by stating a reason why they wish to be approved.", "Moderation", "Everyone", "?apply [role] [reason]", "app");
   else if(args[0].toLowerCase().startsWith("ban"))
   information(msg, "Ban", "This command bans the specified member from the server while sending them a message and logging the reason.", "Moderation", "Admin Only", "?ban @[username] [reason]", "N/A");
-  else if(args[0].toLowerCase().startsWith("erotica"))
-  information(msg, "Erotica", "This command grants access to the explicit channels on the server. You will be required to verify your age, and the role can be taken away and restricted if you lie about your age.", "Moderation", "Everyone who isn't Restricted", "?erotica", "?lewd");
   else if(args[0].toLowerCase().startsWith("kick"))
   information(msg, "Kick", "This command kicks members from the server while sending them a message and logging the reason.", "Moderation", "Admin Only", "?kick @[username] [reason]", "N/A");
   else if(args[0].toLowerCase().startsWith("purge"))
