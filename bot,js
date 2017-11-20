@@ -5,6 +5,13 @@ const bot = new Discord.Client(); //create an instance of a Discord Client, and 
 
 const config = require("./config.json"); // import the config file
 
+import * as utility from '/module/utility';
+import * as fun from '/module/fun';
+import * as music from '/module/music';
+import * as basic from '/module/basic';
+import * as config from '/module/config';
+import * as management from '/module/management';
+
 const editingCode = true
 
 bot.login(config.token);//Login to bot
