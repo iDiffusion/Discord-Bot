@@ -5,6 +5,8 @@ const bot = new Discord.Client(); //create an instance of a Discord Client, and 
 
 const config = require("./config.json"); // import the config file
 
+const editingCode = true
+
 bot.login(config.token);//Login to bot
 bot.on('error', e => { console.error(e); }); //log error to console
 bot.on('warn', e => { console.warn(e); }); //log warning to console
