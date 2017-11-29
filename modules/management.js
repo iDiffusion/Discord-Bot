@@ -1,4 +1,22 @@
-export function ban(*****){
+var cmd, args;
+var chiefRole, modRole, adminRole, staffRole, seniorRole;
+var modlog, cmdchat;
+const config = require("./config.json"); // import the config file
+
+export function update(msg){
+  cmd = msg.content.substr(1).split(" ")[0];
+  args = msg.content.split(" ").slice(1);
+	
+  modlog = msg.guild.channels.find("name", "mod_log");
+  cmdchat = msg.guild.channels.find("name", "commands");
+	
+  chiefRole = msg.guild.roles.find("name","Bot Chief"); //Assign Bot Chief to chiefRole
+  modRole = msg.guild.roles.find("name", "Mod"); //Assign Mod to modRole
+  adminRole = msg.guild.roles.find("name", "Admin"); //Assign Admin to adminRole
+  staffRole = msg.guild.roles.find("name", "Staff"); //Assign Staff to staffRole
+  seniorRole = msg.guild.roles.find("name", "Senior Member"); //Assign SeniorMember to seniorRole
+}
+export function ban(msg){
   if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
           msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **ban** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
           return msg.reply("You pleb, you don't have permission to use this command `?ban`."); //insult unauthorized user
@@ -44,7 +62,7 @@ export function ban(*****){
         }
 }
 
-export funtion kick(*******){
+export function kick(msg){
     if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
       msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **kick** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
       return msg.reply("You pleb, you don't have permission to use this command `?kick`."); //insult unauthorized user
@@ -90,7 +108,7 @@ export funtion kick(*******){
     }
 }
 
-export function move(){
+export function move(msg){
   if(!msg.member.roles.has(adminRole.id) && !msg.member.roles.has(modRole.id)) return msg.reply("You pleb, you don't have permission to use this command `?move`."); //insult unauthorized user
     else if(args.length < 2) {
       msg.channel.sendMessage("You did not define enough arguments. Usage: `?move [VC from ID] [VC to ID]`"); //check for message to move
@@ -113,7 +131,7 @@ export function move(){
     }
 }
 
-export function prune(*****){
+export function prune(msg){
   var mdLimit;
   if(msg.member.roles.has(adminRole.id)) mdLimit = 100; //limit to admin only
   else if(msg.member.roles.has(modRole.id)) mdLimit = 20; //limit to mod only
@@ -130,11 +148,11 @@ export function prune(*****){
   deleteAfterTime(msg, 2000, 1);
 }
 
-export function softban(*******){
+export function softban(msg){
   if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
           msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **kick** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
           return msg.reply("You pleb, you don't have permission to use this command `?kick`."); //insult unauthorized user
-        } else if(args.length < 2) msg.channel.sendMessage("You did not define an argument. Usage: `?kick [user] [reason]`"); //check for user, and reason
+  } else if(args.length < 2) msg.channel.sendMessage("You did not define an argument. Usage: `?kick [user] [reason]`"); //check for user, and reason
         try{
           msg.delete().catch(console.error); //delete message from chat
           userRemoved = msg.mentions.users.first();
@@ -155,7 +173,7 @@ export function softban(*******){
               name:'Reason',
               value: kickMsg
             }],
-            timestamp: new Date()
+            timestamp: new Date(msg,args)
           });//send pm to user with reason
           msg.guild.channels.find("name", "mod_log").sendEmbed({
             color: 16733186,
@@ -177,7 +195,7 @@ export function softban(*******){
         }
 }
 
-export function warn(*****){
+export function warn(msg){
   if(!msg.member.roles.has(staffRole.id) && !msg.member.roles.has(modRole.id) && !msg.member.roles.has(adminRole.id)) { //limit to staff only
       msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **warn** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
       return msg.reply("You pleb, you don't have permission to use this command `?warn`."); //insult unauthorized user
@@ -225,4 +243,21 @@ export function warn(*****){
       console.log(e);
     }
 }
+
+export function purge(msg){
+  if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
+          msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **purge** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
+          return msg.reply("You pleb, you don't have permission to use this command `?purge`."); //insult unauthorized user
+  } 
+  else if(args.length < 1) msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`"); //check for user, and reason
+  try{
+    msg.guild.pruneMembers(arg[0],false,"Removed ${pruned} for inactivity.")
+    
+  } catch(e) {
+      msg.channel.sendMessage("Please `@mention` a user to warn. " + args[0] + " is not a mention.");
+      deleteAfterTime(msg, 2000, 2);
+      console.log(e);
+    }
+}
+          
 
