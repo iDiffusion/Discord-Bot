@@ -1,7 +1,9 @@
 var cmd, args;
 var chiefRole, modRole, adminRole, staffRole, seniorRole;
 var modlog, cmdchat;
+var pruneCountdown = 0;
 const config = require("./config.json"); // import the config file
+
 
 export function update(msg){
   cmd = msg.content.substr(1).split(" ")[0];
@@ -245,19 +247,83 @@ export function warn(msg){
 }
 
 export function purge(msg){
-  if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
-          msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **purge** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
-          return msg.reply("You pleb, you don't have permission to use this command `?purge`."); //insult unauthorized user
-  } 
-  else if(args.length < 1) msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`"); //check for user, and reason
-  try{
-    msg.guild.pruneMembers(arg[0],false,"Removed ${pruned} for inactivity.")
-    
-  } catch(e) {
-      msg.channel.sendMessage("Please `@mention` a user to warn. " + args[0] + " is not a mention.");
-      deleteAfterTime(msg, 2000, 2);
-      console.log(e);
-    }
+	if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
+		msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **purge** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
+		return msg.reply("You pleb, you don't have permission to use this command `?purge`."); //insult unauthorized user
+	} 
+	else if(args.length < 1) msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`"); //check for user, and reason
+	try{
+		pruneCountdown = msg.guild.pruneMembers(args[0],true);
+		msg.guild.pruneMembers(arg[0],false,"Removed for inactivity.");
+		deleteAfterTime(msg, 2000, 2);
+	} catch(e) {
+		msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`");
+		deleteAfterTime(msg, 2000, 2);
+		console.log(e);
+	}
 }
+
+
+//-----------------------------------| Member Events |---------------------------------------\\
+export function memberAdd(mem){
+  let user = mem.guild.member(mem.id);
+  let msgToSend = config.welcome_msg.replace(/-mention/gi, mem.user);
+  mem.guild.channels.find("name", "general").sendMessage(msgToSend);
+  msgToSend = config.welcome_pm.replace(/-server/gi, mem.guild.name).replace(/#information/gi, mem.guild.channels.find("name", "information"));
+  mem.sendMessage(msgToSend);
+  mem.guild.channels.find("name", "mod_log").sendEmbed({
+    color: 3276547,
+    author: {
+      name: mem.displayName + "#" + user.user.discriminator,
+      icon_url: user.user.avatarURL
+    },
+    title: `${mem.user.toString()} | User Joined`,
+    description: `User: ${mem.user} joined the server`,
+    timestamp: new Date()
+  });
+}
+export function memberRemove(mem){ //Member leaves/kicked
+  if(mem.id == userRemoved.id) return;
+  mem.guild.channels.find("name", "mod_log").sendEmbed({
+    color: 285951,
+    author: {
+      name: mem.displayName + "#" + mem.user.discriminator,
+      icon_url: mem.user.avatarURL
+    },
+    title: `${mem.user.toString()} | User Left`,
+    description: `User: ${mem.user} left the server`,
+    timestamp: new Date()
+  });
+}//End member mod_log
+
+export function memberBan(mem){ //Member Ban 
+  if(mem.id == userRemoved.id) return;
+  try{
+    let user = mem.guild.member(mem.id);
+    mem.guild.channels.find("name", "mod_log").sendEmbed({
+      color: 6546816,
+      author: {
+        name: mem.displayName + "#" + user.user.discriminator,
+        icon_url: user.user.avatarURL
+      },
+      title: `${mem.id.toString()} | User Banned`,
+      description: `User: ${mem.user} was banned`,
+      timestamp: new Date()
+    });
+  }catch(e){
+    console.log(e);
+  }
+}
+
+export function memberWelcome(mem){//Welcome new members
+  if(msg.channel.name !== "welcome") return; //if in welcome continue
+  if(!msg.author.bot) return; //if a bot continue
+  if(msg.author.id === 264995143789182976) return; //if not celestial continue
+  let args = msg.content.split(" ").slice(1); //create arguments
+  if(msg.author.username == "Celestial") return; //if not celestial continue
+  let userToSay = msg.mentions.users.first(); //Store user to say
+  msg.delete().catch(console.error); //delete other bots message
+  msg.channel.sendMessage(userToSay + " " + args.join(" ")); //repeat message only from celetial this time
+});//End member welcome
           
 
