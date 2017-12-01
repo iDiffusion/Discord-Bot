@@ -265,7 +265,7 @@ export function purge(msg){
 
 
 //-----------------------------------| Member Events |---------------------------------------\\
-export function memberAdd(mem){
+export function memberAdd(mem){//New member joined
   let user = mem.guild.member(mem.id);
   let msgToSend = config.welcome_msg.replace(/-mention/gi, mem.user);
   mem.guild.channels.find("name", "general").sendMessage(msgToSend);
@@ -282,7 +282,31 @@ export function memberAdd(mem){
     timestamp: new Date()
   });
 }
-export function memberRemove(mem){ //Member leaves/kicked
+export function memberLeave(mem){ //Member leaves/kicked
+  if(pruneCountdown){
+   mem.guild.channels.find("name", "mod_log").sendEmbed({
+    color: 285951,
+    author: {
+      name: mem.displayName + "#" + mem.user.discriminator,
+      icon_url: mem.user.avatarURL
+    },
+    title: `${mem.user.toString()} | User Left`,
+    description: `User: ${mem.user} was purged for inactivity`,
+    timestamp: new Date()
+  });
+    mem.user.sendEmbed({
+    color: 285951,
+    author: {
+      name: mem.guild.name,
+      icon_url: mem.guild.iconURL
+    },
+    title: `You have been removed for inactivity`,
+    description: `If you wish to return when you become more active then: ${config.server_link}`,
+    timestamp: new Date()
+  });
+  pruneCountdown--;
+  return;
+  }
   if(mem.id == userRemoved.id) return;
   mem.guild.channels.find("name", "mod_log").sendEmbed({
     color: 285951,
