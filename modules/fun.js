@@ -110,3 +110,12 @@ export function rps(msg,args){
 
      msg.reply(compare(userChoice,computerChoice).replace("-user", msg.author.username));
 }
+
+export function reverse(msg,args){
+  msg = list(msg);
+  reverseWord = [];
+  for(int i = msg.length - 1; i>0; i--){
+    reverse.append(msg[i])
+  }
+  return "".join(reverseWord);
+}
