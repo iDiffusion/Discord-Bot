@@ -112,10 +112,10 @@ export function rps(msg,args){
 }
 
 export function reverse(msg,args){
-  msg = list(msg);
   reverseWord = [];
-  for(int i = msg.length - 1; i>0; i--){
-    reverse.append(msg[i])
+  args = args.join(" ").split("");
+  for(int i = args.length - 1; i>0; i--){
+    reverseWord += args[i];
   }
-  return "".join(reverseWord);
+  msg.reply("Your message reversed is `${reverseWord}`");
 }
