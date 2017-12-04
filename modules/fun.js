@@ -119,3 +119,42 @@ export function reverse(msg,args){
   }
   msg.reply("Your message reversed is `${reverseWord}`");
 }
+
+export function rollDice(msg,args){
+  let hasD = 0;
+  if(args.length != 1){
+    return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]`");
+  }
+  else if(isNaN(args[0])){
+    hasD = 1;
+    args.split("d");
+    if(args.length != 2) {
+      return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]`");
+    }
+  }
+  else {
+    hasD = 0;
+    args[1] = 6;
+  }
+  try{
+    var valArray = [];
+    for(int i = 1; i <= args[0]; i++){
+      let tempVal = Math.floor(Math.random() * args[1]) + 1;
+      if(tempVal == args[1] + 1){
+        tempVal = args[1];
+      }
+      valArray.push(tempVal);
+      let sum = valArray.reduce((total, current) => current += total);
+      let average = sum/valArray.length;
+    }
+    if(hasD){
+      return msg.reply("Your rolls are `" + valArray.join(", ") + ".");
+    }
+    else {
+      return msg.reply("Your rolls are `" + valArray.join(", ") + "` and the average is **" + average + "**.");
+    }
+  }
+  catch(e){
+    return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]`");
+  }
+}
