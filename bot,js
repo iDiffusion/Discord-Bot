@@ -3,7 +3,11 @@
 const Discord = require("discord.js"); //import the discord.js module
 const bot = new Discord.Client(); //create an instance of a Discord Client, and call it bot
 
-const config = require("./config.json"); // import the config file
+// const CleverBot = require("cleverbot-node");
+// const cleverBot = new CleverBot();
+
+const auth = require("./auth.json"); // import the authorzation file
+const config = require("/config/config.json"); // import the config file
 
 import * as utility from '/module/utility';
 import * as fun from '/module/fun';
@@ -11,9 +15,9 @@ import * as music from '/module/music';
 import * as basic from '/module/basic';
 import * as management from '/module/management';
 
-const editingCode = true
+const editingCode = true;
 
-bot.login(config.token);//Login to bot
+bot.login(auth.token);//Login to bot
 bot.on('error', e => { console.error(e); }); //log error to console
 bot.on('warn', e => { console.warn(e); }); //log warning to console
 //bot.on('debug', e => { console.debug(e); }); //log debugs to console
@@ -21,10 +25,13 @@ bot.on('disconnect', () => { console.log('Celestial has left the building!'); })
 bot.on('reconneting', () => { console.log('Attempting to find Celestial.'); }); //log bot reconneting to console
 bot.on('ready', () => { //Display ready when bot is active
   console.log('Celestial is ready to serve!');
-  let randNumber = Math.round(Math.random() * (config.games.length - 1));
-  if(editingCode) bot.user.setGame('with code');
-  else bot.user.setGame(config.games[randNumber]);
-});
+  if(editingCode) {
+    bot.user.setGame('with code');
+  } else {
+    let randNumber = Math.floor(Math.random() * auth.messages.length);
+    bot.user.setGame(auth.messages[randNumber]);
+  }
+);
 
 bot.on("message", msg => {
 
