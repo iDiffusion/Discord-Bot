@@ -1,155 +1,173 @@
-var cmd, args;
-var modlog, cmdchat;
-var pruneCountdown = 0;
-var userRemoved = [];
-const config = require("./config.json"); // import the config file
+var usersRemoved = [];
+const config = require("/config/config.json"); // import the config file
+const cmdChannelName = "commands";
+#define PREFIX config.prefix
 
-export function update(msg){
-  cmd = msg.content.substr(1).split(" ")[0];
-  args = msg.content.split(" ").slice(1);
-
-  modlog = msg.guild.channels.find("name", "mod_log");
-  cmdchat = msg.guild.channels.find("name", "commands");
+function sendToModlog(msg, type, color, user, message) {
+	try {
+		msg.guild.channels.find("name", "mod_log").sendEmbed({
+			color: color,
+			author: {
+				name: user.username,
+				icon_url: user.avatarURL
+			},
+			title: `User ${type.charAt(0).toUpperCase()}`,
+			description: `${msg.author} has ${type.toLowerCase()} ${user}`,
+			fields: [{
+				name: `Reason`,
+				value: message
+			}],
+			timestamp: new Date()
+		});
+		return 1;
+	}
+  catch(e) {
+		return 0;
+	}
 }
 
-export function ban(msg){
-  if(msg.channel.type == 'dm'){
+function sendToDM(msg, type, color, user, message) {
+	try {
+		msg.guild.members.get(user.id).sendEmbed({
+			color: color,
+			author: {
+				name: msg.guild.name,
+				icon_url: msg.guild.iconURL
+			},
+			title: type.charAt(0).toUpperCase(),
+			description: `You have been ${type.toLowerCase()} by ${msg.member.highestRole}`,
+			fields: [{
+				name:'Reason',
+				value: message
+			}],
+			timestamp: new Date()
+		});
+		return 1;
+	}
+  catch(e) {
+		return 0;
+	}
+}
+
+function badUserToModlog(msg, func){
+	try {
+		msg.guild.channels.find("name", "mod_log").sendEmbed({
+			color: 16718305,
+			author: {
+				name: msg.author.username,
+				icon_url: msg.author.avatarURL
+			},
+			title: `Unauthorized user attempted to ${func} users`,
+			description: `${msg.author} has used ${func} in #${msg.channel} text channel`,
+			fields: [{
+				name:'Command',
+				value: `\`${msg.cleanContent}\``
+			}],
+			timestamp: new Date()
+		});
+    return 1;
+	}
+  catch(e) {
+		return 0;
+	}
+}
+
+export function ban(msg) {
+  let args = msg.content.split(" ").slice(1);
+  let modlog = msg.guild.channels.find("name", "mod_log");
+  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
+  if(msg.channel.type == 'dm') { // Limit to guilds only
     return msg.channel.sendMessage("Unable to use this command in private chat.");
   }
-  args = msg.content.split(" ").slice(1);
-  let modlog = msg.guild.channels.find("name", "mod_log");
-  if(!msg.member.hasPermission(banMembers)) { //limit to members that can ban in that quild
-    if(modlog) {
-      modlog.sendMessage("**" + msg.author + "** has attempted to use the **ban** command in " + msg.channel + ":" + " `" + msg.cleanContent + "`"); //record message
-      modlog.sendEmbed({
-        color: 16718305,
-        author: {
-          name: msg.author.username,
-          icon_url: msg.author.avatarURL
-        },
-        title: 'Unauthorized user attempted to ban users',
-        description: `${msg.author} has used ban in #${msg.channel} text channel`,
-        fields: [{
-          name:'Command',
-          value: msg.cleanContent
-        }],
-        timestamp: new Date()
-      });
+  else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
+    return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
+  }
+  else if(!msg.member.hasPermission("banMembers")) { //limit to members that can ban in that quild
+    badUserToModlog(msg, "ban");
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}ban\``); //insult unauthorized user
+  }
+  else if(args.length < 2 || !msg.mentions.users.first()) {
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}ban [user] [reason]\``); //check for user, and reason
+  }
+  msg.delete().catch(console.error); //delete message from chat
+  let userToBan = msg.mentions.users.first(); //set user to ban
+  let banMsg = args.join(" "); //set reason to arguments minus user
+  if(sendToDM(msg, "banned", 16721408, userToBan, banMsg){
+    msg.guild.member(userToBan).ban(banMsg); //ban the mentioned user
+    usersRemoved.push(userToBan);
+    if(!sendToModlog(msg, "banned", 16721408, userToBan, banMsg)) {
+      msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.");
     }
-    return msg.reply("You pleb, you don't have permission to use this command `?ban`."); //insult unauthorized user
-  } else if(args.length < 2) {
-    msg.channel.sendMessage("You did not define an argument. Usage: `?ban [user] [reason]`"); //check for user, and reason
-  } try {
-    msg.delete().catch(console.error); //delete message from chat
-    userRemoved.push(msg.mentions.users.first());
-    let userToBan = msg.mentions.users.first(); //set user to ban
-    let banMsg = args.slice(1).join(" "); //set reason to arguments minus user
-    msg.guild.members.get(userToBan.id).sendEmbed({
-      color: 16721408,
-      author: {
-        name: msg.guild.name,
-        icon_url: msg.guild.iconURL
-      },
-      title: 'Banned',
-      description: `You have been banned!`,
-      fields: [{
-        name:'Reason',
-        value: banMsg
-      }],
-      timestamp: new Date()
-    });//send pm to user with reason
-    msg.guild.member(userToBan).ban(); //ban the mentioned user
-    if(modlog) {
-      modlog.sendEmbed({
-        color: 16721408,
-        author: {
-          name: userToBan.username,
-          icon_url: userToBan.avatarURL
-        },
-        title: 'User Banned',
-        description: `${msg.author} has been banned ${userToBan} `,
-        fields: [{
-          name:'Reason',
-          value: banMsg
-        }],
-        timestamp: new Date()
-      }); //send embed message to modlog
-    } else {
-      msg.channel.sendMessage("Unable to find **mod_log** text channel, please consult an admin or server owner.");
-    }
-  } catch(e) {
-    msg.reply("Please `@mention` a user to ban. " + args[0] + " is not a mention.");
+  }
+  else{
+    msg.reply(`Please **@mention** a user to ban. **${args[0]}** is not a mention.`);
     deleteAfterTime(msg, 2000, 2);
   }
 }
 
-export function kick(msg){
-    if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
-      msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **kick** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
-      return msg.reply("You pleb, you don't have permission to use this command `?kick`."); //insult unauthorized user
-    } else if(args.length < 2) msg.channel.sendMessage("You did not define an argument. Usage: `?kick [user] [reason]`"); //check for user, and reason
-    try{
-      msg.delete().catch(console.error); //delete message from chat
-      userRemoved = msg.mentions.users.first();
-      let userToKick = msg.mentions.users.first(); //set user to ban
-      let kickMsg = args.slice(1).join(" "); //set reason to arguments minus user
-      msg.guild.member(userToKick).kick(kickMsg); //kick the mentioned user
-      msg.guild.members.get(userToKick.id).sendEmbed({
-        color: 16733186,
-        author: {
-          name: msg.guild.name,
-          icon_url: msg.guild.iconURL
-        },
-        title: 'Kicked',
-        description: `You have been kicked!`,
-        link: config.server_link,
-        fields: [{
-          name:'Reason',
-          value: kickMsg
-        }],
-        timestamp: new Date()
-      });//send pm to user with reason
-      msg.guild.channels.find("name", "mod_log").sendEmbed({
-        color: 16733186,
-        author: {
-          name: userToKick.username,
-          icon_url: userToKick.avatarURL
-        },
-        title: 'User Kicked',
-        description: `${msg.author} has kicked ${userToKick} `,
-        fields: [{
-          name:'Reason',
-          value: kickMsg
-        }],
-        timestamp: new Date()
-      }); //send embed message to modlog
-    } catch(e) {
-      msg.reply("Please `@mention` a user to kick. " + args[0] + " is not a mention.");
-      deleteAfterTime(msg, 2000, 2);
+export function kick(msg) {
+  let args = msg.content.split(" ").slice(1);
+  let modlog = msg.guild.channels.find("name", "mod_log");
+  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
+  if(msg.channel.type == 'dm') { // Limit to guilds only
+    return msg.channel.sendMessage("Unable to use this command in private chat.");
+  }
+  else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
+    return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
+  }
+  else if(!msg.member.hasPermssion("kickMembers")) { //limit to memebrs that can kick in that quild
+    badUserToModlog(msg, "kick");
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}kick\``); //insult unauthorized user
+  }
+  else if(args.length < 2) {
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}kick [user] [reason]\``); //check for user, and reason
+  }
+  msg.delete().catch(console.error); //delete message from chat
+  let userToKick = msg.mentions.users.first(); //set user to ban
+  let kickMsg = args.join(" "); //set reason to arguments minus user
+  if(sendToDM(msg, "kicked", 16733186, userToKick, kickMsg)) {
+    msg.guild.member(userToKick).kick(kickMsg); //kick the mentioned user
+    usersRemoved.push(userToKick);
+    if(!sendToModlog(msg, "kicked", 16733186, userToKick, kickMsg)) {
+      msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.")
     }
+  }
+  else {
+    msg.reply(`Please **@mention** a user to kick. **${args[0]}** is not a mention.`);
+    deleteAfterTime(msg, 2000, 2);
+  }
 }
 
 export function move(msg){
-  if(!msg.member.roles.has(adminRole.id) && !msg.member.roles.has(modRole.id)) return msg.reply("You pleb, you don't have permission to use this command `?move`."); //insult unauthorized user
-    else if(args.length < 2) {
-      msg.channel.sendMessage("You did not define enough arguments. Usage: `?move [VC from ID] [VC to ID]`"); //check for message to move
-      return deleteAfterTime(msg, 2000, 2);
-    } else if(isNaN(args[0]) || isNaN(args[1])){
-      msg.channel.sendMessage("You did not define an argument. Usage: `?move [VC from ID] [VC to ID]`");
-      return  deleteAfterTime(msg, 3000, 2);
-    }
-      let mem_array = msg.guild.channels.get(args[0]).members.array();
-     if(mem_array.length < 1) {
-      msg.channel.sendMessage(`Currently there are no members in ${msg.guild.channels.get(args[0]).name}. Please try again.`);
-      return deleteAfterTime(msg, 2000, 2);
-    }
-    try {
-      msg.delete();
-      mem_array.map(id => msg.guild.member(id).setVoiceChannel(msg.guild.channels.get(args[1])));
-    } catch (e){
-      msg.channel.sendMessage("One of the provided channel ID's does not exist. Please make sure that the numbers provided are ID's");
-      deleteAfterTime(msg, 3000, 1);
-    }
+  if(!msg.member.hasPermission("voiceMoveMembers")) {
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}move `); //insult unauthorized user
+  }
+  else if(args.length < 2 || isNaN(args[0]) || isNaN(args[1])) {
+    msg.channel.sendMessage(`You did not define enough arguments. Usage: \`${PREFIX}move [VC from ID] [VC to ID]`); //check for message to move
+    return deleteAfterTime(msg, 2000, 2);
+  }
+  let mem_array = msg.guild.channels.get(args[0]).members.array();
+  let fromChannel = msg.guild.channels.get(args[0]);
+  let toChannel = msg.guild.channels.get(args[1]);
+  if(mem_array.length == 0 && fromChannel) {
+    msg.channel.sendMessage(`Currently there are no members in ${fromChannel.name}. Usage: \`${PREFIX}move [VC from ID] [VC to ID]\``);
+    return deleteAfterTime(msg, 2000, 2);
+  }
+  else if(!fromChannel || fromChannel.type != "text") {
+    msg.channel.sendMessage("From channel ID doesnt match a text channel from this server. Please try again.");
+    return deleteAfterTime(msg, 2000, 2);
+  }
+  else if(!toChannel || toChannel.type != "text"){
+    msg.channel.sendMessage("To channel ID doesnt match a text channel from this server. Please try again.");
+    return delteAfterTime(msg, 2000, 2);
+  }
+  try {
+    msg.delete();
+    mem_array.map(id => msg.guild.member(id).setVoiceChannel(msg.guild.channels.get(args[1])));
+  } catch (e){
+    msg.channel.sendMessage("One of the provided channel ID's does not exist. Please make sure that the numbers provided are ID's");
+    deleteAfterTime(msg, 3000, 1);
+  }
 }
 
 /*
@@ -172,119 +190,101 @@ export function prune(msg){
 */
 
 export function softban(msg){
-  if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
-    msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **kick** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
-    return msg.reply("You pleb, you don't have permission to use this command `?kick`."); //insult unauthorized user
-  } else if(args.length < 2) msg.channel.sendMessage("You did not define an argument. Usage: `?kick [user] [reason]`"); //check for user, and reason
-  try{
+  let args = msg.content.split(" ").slice(1);
+  let modlog = msg.guild.channels.find("name", "mod_log");
+  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
+  if(msg.channel.type == 'dm') { // Limit to guilds only
+    return msg.channel.sendMessage("`Unable to use this command in private chat.``");
+  }
+  else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
+    return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
+  }
+  else if(!msg.member.hasPermission("banMembers") || !msg.member.hasPermssion("kickMembers")) { //limit to admin only
+    badUserToModlog(msg, "softban");
+    return msg.reply(`You pleb, you don't have permission to use this command \`${PREFIX}softban\``); //insult unauthorized user
+  }
+  else if(args.length < 2 || !msg.mentions.users.first()) {
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}softban [user] [reason]\``); //check for user, and reason
+  }
     msg.delete().catch(console.error); //delete message from chat
-    userRemoved = msg.mentions.users.first();
     let userToKick = msg.mentions.users.first(); //set user to ban
-    let kickMsg = args.slice(1).join(" "); //set reason to arguments minus user
-    msg.guild.member(userToKick).ban(); //ban the mentioned user
-    msg.guild.unban(userToKick.id); //unban the mentioned user
-    msg.guild.members.get(userToKick.id).sendEmbed({
-      color: 16733186,
-      author: {
-        name: msg.guild.name,
-        icon_url: msg.guild.iconURL
-      },
-      title: 'Kicked',
-      description: `You have been kicked!`,
-      link: config.server_link,
-      fields: [{
-        name:'Reason',
-        value: kickMsg
-      }],
-      timestamp: new Date(msg,args)
-    });//send pm to user with reason
-    msg.guild.channels.find("name", "mod_log").sendEmbed({
-      color: 16733186,
-      author: {
-        name: userToKick.username,
-        icon_url: userToKick.avatarURL
-      },
-      title: 'User Soft Banned',
-      description: `${msg.author} has been soft banned ${userToKick} `,
-      fields: [{
-        name:'Reason',
-        value: kickMsg
-      }],
-      timestamp: new Date()
-    }); //send embed message to modlog
-  } catch(e) {
-    msg.reply("Please `@mention` a user to softban. " + args[0] + " is not a mention.");
+    let kickMsg = args.join(" "); //set reason to arguments minus user
+  if(sendToDM(msg, "Soft Banned", 16733186, userToKick, kickMsg)) {
+    msg.guild.ban(userToKick.id, kickMsg); //ban the mentioned user
+    msg.guild.unban(userToKick.id, "Soft Ban Only"); //unban the mentioned user
+    usersRemoved.push(userToKick);
+    if(!sendToModlog(msg, "Soft Banned", 16733186, userToKick, kickMsg)) {
+      msg.channel.sendMessage("Unable to find #mod_log text channel, please consult an admin or server owner.");
+    }
+  }
+  else {
+    msg.channel.sendMessage(`Please **@mention** a user to kick. **${args[0]}** is not a mention.`);
     deleteAfterTime(msg, 2000, 2);
   }
 }
 
 export function warn(msg){
-  if(!msg.member.roles.has(staffRole.id) && !msg.member.roles.has(modRole.id) && !msg.member.roles.has(adminRole.id)) { //limit to staff only
-      msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **warn** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
-      return msg.reply("You pleb, you don't have permission to use this command `?warn`."); //insult unauthorized user
-  } else if(args.length < 2) {
-    msg.channel.sendMessage("You did not define an argument. Usage: `?warn [user] [message]`"); //check for user, and reason
-  } try {
-      msg.delete().catch(console.error); //delete message from chat
-      let userToWarn = msg.mentions.users.first(); //set user to warn
-      let warnMsg = args.slice(1).join(" "); //set reason to arguments minus user
-      let highestRole = "Staff";
-      console.log(userToWarn);
-      if(msg.member.roles.has(adminRole.id)) highestRole = "Admin";
-      else if(msg.member.roles.has(modRole.id)) highestRole = "Mod";
-      else highestRole = "Staff";
-      msg.guild.members.get(userToWarn.id).sendEmbed({
-        color: 16774400,
-        author: {
-          name: msg.guild.name,
-          icon_url: msg.guild.iconURL
-        },
-        title: 'Warning',
-        description: `You have been warned by ${highestRole}`,
-        fields: [{
-          name:'Reason',
-          value: warnMsg
-        }],
-        timestamp: new Date()
-      }).catch(console.error); //send pm to user with reason
-      msg.guild.channels.find("name", "mod_log").sendEmbed({
-        color: 16774400,
-        author: {
-          name: userToWarn.username,
-          icon_url: userToWarn.avatarURL
-        },
-        title: 'User Warned',
-        description: `${msg.author} has warned ${userToWarn}`,
-        fields: [{
-          name:'Reason',
-          value: warnMsg
-        }],
-        timestamp: new Date()
-      }).catch(console.error); //send embed message to modlog
-    } catch(e) {
-      msg.channel.sendMessage("Please `@mention` a user to warn. " + args[0] + " is not a mention.");
-      deleteAfterTime(msg, 2000, 2);
-      console.log(e);
+  let args = msg.content.split(" ").slice(1);
+  let modlog = msg.guild.channels.find("name", "mod_log");
+  let cmdchat = msg.guild.channels.find("name", "commands");
+  if(msg.channel.type == 'dm'){
+    return msg.channel.sendMessage("Unable to use this command in private chat.");
+  }
+  else if(cmdChat && msg.channel.name != "commands") {
+    return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
+  }
+  else if(!msg.member.hasPermission("muteMembers") && !msg.member.hasPermission("deafenMembers")) { //limit to members that can ban in that quild
+    badUserToModlog(msg, "Warn");
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}warn\``); //insult unauthorized user
+  }
+  else if(args.length < 2) {
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}warn [user] [reason]\``); //check for user, and reason
+  }
+  msg.delete().catch(console.error); //delete message from chat
+  let userToWarn = msg.mentions.users.first(); //set user to warn
+  let warnMsg = args.slice(1).join(" "); //set reason to arguments minus user
+  if(sendToDM(msg, "Warned", 16774400, userToWarn, warnMsg)) {
+    if(!sendToModlog(msg, "Warned", 16774400, userToWarn, warnMsg)) {
+      msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.")
     }
+  }
+  else{
+    msg.channel.sendMessage(`Please **@mention** a user to kick. **${args[0]}** is not a mention.`);
+    deleteAfterTime(msg, 2000, 2);
+    console.log(e);
+  }
 }
 
 export function purge(msg){
-	if(!msg.member.roles.has(adminRole.id)) { //limit to admin only
-		msg.guild.channels.find("name", "mod_log").sendMessage("**" + msg.author + "** has attempted to use the **purge** command in " + msg.channel + ":" + " `" + msg.content + "`"); //record message to modlog
+  let args = msg.content.split(" ").slice(1);
+  let modlog = msg.guild.channels.find("name", "mod_log");
+  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
+  if(msg.channel.type == "dm") {
+    return msg.reply("Unable to use this command in private chat.");
+  }
+  else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
+    return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
+  }
+	else if(!msg.member.hasPermission("kickMembers")) { //limit to admin only
+		badUserToModlog(msg, "prune");
 		return msg.reply("You pleb, you don't have permission to use this command `?purge`."); //insult unauthorized user
 	}
 	else if(args.length < 1) msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`"); //check for user, and reason
 	try{
-		pruneCountdown = msg.guild.pruneMembers(args[0],true);
-		msg.guild.pruneMembers(arg[0],false,"Removed for inactivity.");
-		deleteAfterTime(msg, 2000, 2);
+		msg.guild.pruneMembers(arg[0],false,"Removed for inactivity.").then(pruned =>{
+      if(modlog) {
+        modlog.sendMessage(`I just pruned ${pruned} members!`);
+      }
+      else {
+        msg.channel.sendMessage(`I just pruned ${pruned} members!`);
+      }
+    });
 	} catch(e) {
 		msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`");
 		deleteAfterTime(msg, 2000, 2);
-		console.log(e);
+		console.error(e);
 	}
 }
-
 
 //-----------------------------------| Member Events |---------------------------------------\\
 export function memberAdd(mem){//New member joined
@@ -330,7 +330,7 @@ export function memberLeave(mem){ //Member leaves/kicked
   pruneCountdown--;
   return;
   }
-  if(mem.id == userRemoved.id) return;
+  if(mem.id == usersRemoved.id) return;
   mem.guild.channels.find("name", "mod_log").sendEmbed({
     color: 285951,
     author: {
@@ -344,7 +344,7 @@ export function memberLeave(mem){ //Member leaves/kicked
 }//End member mod_log
 
 export function memberBan(mem){ //Member Ban
-  if(mem.id == userRemoved.id) return;
+  if(mem.id == usersRemoved.id) return;
   try{
     let user = mem.guild.member(mem.id);
     mem.guild.channels.find("name", "mod_log").sendEmbed({
