@@ -288,15 +288,28 @@ export function purge(msg){
 
 //-----------------------------------| Member Events |---------------------------------------\\
 export function memberAdd(mem){//New member joined
-  let user = mem.guild.member(mem.id);
-  let msgToSend = config.welcome_msg.replace(/-mention/gi, mem.user);
-  mem.guild.channels.find("name", "general").sendMessage(msgToSend);
-  msgToSend = config.welcome_pm.replace(/-server/gi, mem.guild.name).replace(/#information/gi, mem.guild.channels.find("name", "information"));
-  mem.sendMessage(msgToSend);
-  mem.guild.channels.find("name", "mod_log").sendEmbed({
+  if(config.welcome_pm){
+    let msgToSend = config.welcome_pm.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user). replace(/$mention/gi, mem.user.username);
+    msgToSend = msgToSend.split(" ").map(word => {
+      if(word.startsWith("#")){
+        let channel = mem.guild.channels.find("name", word.substr(1));
+        word = channel ? channel : word;
+      }
+    });
+    mem.user.sendMessage(msgToSend);
+  }
+  if(config.welcome_msg){
+    let msgToSend = config.welcome_msg.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user). replace(/$mention/gi, mem.user.username);
+    mem.guild.channels.find("name", "general").sendMessage(msgToSend);
+  }
+  var modlog = mem.guild.channels.find("name"."mod_log");
+  if(!modlog)
+    modlog = mem.guild.defaultChannel;
+  }
+  modlog.sendEmbed({
     color: 3276547,
     author: {
-      name: mem.displayName + "#" + user.user.discriminator,
+      name: mem.displayName + "#" + mem.user.discriminator,
       icon_url: user.user.avatarURL
     },
     title: `${mem.user.toString()} | User Joined`,
@@ -306,32 +319,18 @@ export function memberAdd(mem){//New member joined
 }
 
 export function memberLeave(mem){ //Member leaves/kicked
-  if(pruneCountdown){
-   mem.guild.channels.find("name", "mod_log").sendEmbed({
-    color: 285951,
-    author: {
-      name: mem.displayName + "#" + mem.user.discriminator,
-      icon_url: mem.user.avatarURL
-    },
-    title: `${mem.user.toString()} | User Left`,
-    description: `User: ${mem.user} was purged for inactivity`,
-    timestamp: new Date()
-  });
-    mem.user.sendEmbed({
-    color: 285951,
-    author: {
-      name: mem.guild.name,
-      icon_url: mem.guild.iconURL
-    },
-    title: `You have been removed for inactivity`,
-    description: `If you wish to return when you become more active then: ${config.server_link}`,
-    timestamp: new Date()
-  });
-  pruneCountdown--;
-  return;
+  usersRemoved.map(user =>{
+    if(user.id == mem.id){
+      let index = usersRemoved.indexOf(mem);
+      usersRemoved.splice(index, 1);
+      return;
+    }
+  })
+  var modlog = mem.guild.channels.find("name"."mod_log");
+  if(!modlog)
+    modlog = mem.guild.defaultChannel;
   }
-  if(mem.id == usersRemoved.id) return;
-  mem.guild.channels.find("name", "mod_log").sendEmbed({
+  modlog.sendEmbed({
     color: 285951,
     author: {
       name: mem.displayName + "#" + mem.user.discriminator,
@@ -344,13 +343,21 @@ export function memberLeave(mem){ //Member leaves/kicked
 }//End member mod_log
 
 export function memberBan(mem){ //Member Ban
-  if(mem.id == usersRemoved.id) return;
-  try{
-    let user = mem.guild.member(mem.id);
-    mem.guild.channels.find("name", "mod_log").sendEmbed({
+  usersRemoved.map(user =>{
+    if(user.id == mem.id){
+      let index = usersRemoved.indexOf(mem);
+      usersRemoved.splice(index, 1);
+      return;
+    }
+  })
+  var modlog = mem.guild.channels.find("name"."mod_log");
+  if(!modlog)
+    modlog = mem.guild.defaultChannel;
+  }
+  modlog.sendEmbed({
       color: 6546816,
       author: {
-        name: mem.displayName + "#" + user.user.discriminator,
+        name: mem.displayName + "#" + mem.user.discriminator,
         icon_url: user.user.avatarURL
       },
       title: `${mem.id.toString()} | User Banned`,
@@ -361,14 +368,3 @@ export function memberBan(mem){ //Member Ban
     console.log(e);
   }
 }
-
-export function memberWelcome(mem){//Welcome new members
-  if(msg.channel.name !== "welcome") return; //if in welcome continue
-  if(!msg.author.bot) return; //if a bot continue
-  if(msg.author.id === 264995143789182976) return; //if not celestial continue
-  let args = msg.content.split(" ").slice(1); //create arguments
-  if(msg.author.username == "Celestial") return; //if not celestial continue
-  let userToSay = msg.mentions.users.first(); //Store user to say
-  msg.delete().catch(console.error); //delete other bots message
-  msg.channel.sendMessage(userToSay + " " + args.join(" ")); //repeat message only from celetial this time
-});//End member welcome
