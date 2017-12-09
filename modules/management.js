@@ -1,7 +1,7 @@
 var usersRemoved = [];
 const config = require("/config/config.json"); // import the config file
 const cmdChannelName = "commands";
-#define PREFIX config.prefix
+var PREFIX = config.prefix;
 
 function sendToModlog(msg, type, color, user, message) {
 	try {
@@ -72,92 +72,101 @@ function badUserToModlog(msg, func){
 	}
 }
 
-export function ban(msg) {
+export function banMembers(msg, bot) {
   let args = msg.content.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
   let cmdchat = msg.guild.channels.find("name", cmdChannelName);
   if(msg.channel.type == 'dm') { // Limit to guilds only
     return msg.channel.sendMessage("Unable to use this command in private chat.");
   }
+	else if(!msg.guild.member(bot.user).hasPermission("BAN_MEMBERS")){ // check if bot has permission
+		msg.channel.sendMessage("Unable to complete request to ban members, I don't have the necessary permissions: `BAN_MEMBERS`\n An admin or server owner must change this before you are able to use this command.");
+	}
   else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
     return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
-  else if(!msg.member.hasPermission("banMembers")) { //limit to members that can ban in that quild
+  else if(!msg.member.hasPermission("BAN_MEMBERS")) { //limit to members that can ban in that quild
     badUserToModlog(msg, "ban");
-    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}ban\``); //insult unauthorized user
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}ban\``);
   }
-  else if(args.length < 2 || !msg.mentions.users.first()) {
-    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}ban [user] [reason]\``); //check for user, and reason
+  else if(args.length < 2 || !msg.mentions.users.first()) { //check for all fields
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}ban [user] [reason]\``);
   }
-  msg.delete().catch(console.error); //delete message from chat
-  let userToBan = msg.mentions.users.first(); //set user to ban
-  let banMsg = args.join(" "); //set reason to arguments minus user
-  if(sendToDM(msg, "banned", 16721408, userToBan, banMsg){
-    msg.guild.member(userToBan).ban(banMsg); //ban the mentioned user
+  msg.delete().catch(console.error);
+  let userToBan = msg.mentions.users.first();
+  let banMsg = args.join(" ");
+  if(sendToDM(msg, "banned", 16721408, userToBan, banMsg){ // check if user exist
+    msg.guild.member(userToBan).ban(banMsg);
     usersRemoved.push(userToBan);
     if(!sendToModlog(msg, "banned", 16721408, userToBan, banMsg)) {
       msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.");
     }
   }
   else{
-    msg.reply(`Please **@mention** a user to ban. **${args[0]}** is not a mention.`);
-    deleteAfterTime(msg, 2000, 2);
+    msg.channel.sendMessage(`Please **@mention** a user to ban. **${args[0]}** is not a mention.`);
+    deleteAfterTime(msg, 2000, 1);
   }
 }
 
-export function kick(msg) {
+export function kickMembers(msg, bot) {
   let args = msg.content.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
   let cmdchat = msg.guild.channels.find("name", cmdChannelName);
   if(msg.channel.type == 'dm') { // Limit to guilds only
     return msg.channel.sendMessage("Unable to use this command in private chat.");
   }
+	else if(!msg.guild.member(bot.user).hasPermission("KICK_MEMBERS")){ // check if bot has permission
+		msg.channel.sendMessage("Unable to complete request to kick members, I don't have the necessary permissions: `KICK_MEMBERS`\n An admin or server owner must change this before you are able to use this command.");
+	}
   else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
     return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
   else if(!msg.member.hasPermssion("kickMembers")) { //limit to memebrs that can kick in that quild
     badUserToModlog(msg, "kick");
-    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}kick\``); //insult unauthorized user
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}kick\``);
   }
-  else if(args.length < 2) {
-    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}kick [user] [reason]\``); //check for user, and reason
+  else if(args.length < 2 || !msg.mentions.users.first()) { //check for all fields
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}kick [user] [reason]\``);
   }
-  msg.delete().catch(console.error); //delete message from chat
-  let userToKick = msg.mentions.users.first(); //set user to ban
-  let kickMsg = args.join(" "); //set reason to arguments minus user
-  if(sendToDM(msg, "kicked", 16733186, userToKick, kickMsg)) {
-    msg.guild.member(userToKick).kick(kickMsg); //kick the mentioned user
+  msg.delete().catch(console.error);
+  let userToKick = msg.mentions.users.first();
+  let kickMsg = args.join(" ");
+  if(sendToDM(msg, "kicked", 16733186, userToKick, kickMsg)) { //check if user exist
+    msg.guild.member(userToKick).kick(kickMsg);
     usersRemoved.push(userToKick);
     if(!sendToModlog(msg, "kicked", 16733186, userToKick, kickMsg)) {
       msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.")
     }
   }
   else {
-    msg.reply(`Please **@mention** a user to kick. **${args[0]}** is not a mention.`);
-    deleteAfterTime(msg, 2000, 2);
+    msg.channel.sendMessage(`Please **@mention** a user to kick. **${args[0]}** is not a mention.`);
+    deleteAfterTime(msg, 2000, 1);
   }
 }
 
-export function move(msg){
-  if(!msg.member.hasPermission("voiceMoveMembers")) {
-    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}move `); //insult unauthorized user
+export function moveMembers(msg, bot){
+	if(!msg.guild.member(bot.user).hasPermssion("MOVE_MEMBERS")){ //check if bot has permission to move members
+		msg.channel.sendMessage("Unable to complete request to move members, I don't have the necessary permissions `MOVE_MEMBERS`\n An admin or server owner must change this before you are able to user this command.`");
+	}
+  if(!msg.member.hasPermission("MOVE_MEMBERS")) { //limit to members taht have permission
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}move `);
   }
-  else if(args.length < 2 || isNaN(args[0]) || isNaN(args[1])) {
-    msg.channel.sendMessage(`You did not define enough arguments. Usage: \`${PREFIX}move [VC from ID] [VC to ID]`); //check for message to move
+  else if(args.length < 2 || isNaN(args[0]) || isNaN(args[1])) { //check for all fields
+    msg.channel.sendMessage(`You did not define enough arguments. Usage: \`${PREFIX}move [VC from ID] [VC to ID]`);
     return deleteAfterTime(msg, 2000, 2);
   }
   let mem_array = msg.guild.channels.get(args[0]).members.array();
   let fromChannel = msg.guild.channels.get(args[0]);
   let toChannel = msg.guild.channels.get(args[1]);
-  if(mem_array.length == 0 && fromChannel) {
+  if(mem_array.length == 0 && fromChannel) { //check that members are in from channel
     msg.channel.sendMessage(`Currently there are no members in ${fromChannel.name}. Usage: \`${PREFIX}move [VC from ID] [VC to ID]\``);
     return deleteAfterTime(msg, 2000, 2);
   }
-  else if(!fromChannel || fromChannel.type != "text") {
+  else if(!fromChannel || fromChannel.type != "text") { //check that from channel exist
     msg.channel.sendMessage("From channel ID doesnt match a text channel from this server. Please try again.");
     return deleteAfterTime(msg, 2000, 2);
   }
-  else if(!toChannel || toChannel.type != "text"){
+  else if(!toChannel || toChannel.type != "text"){ //check taht to channel exist
     msg.channel.sendMessage("To channel ID doesnt match a text channel from this server. Please try again.");
     return delteAfterTime(msg, 2000, 2);
   }
@@ -189,29 +198,32 @@ export function prune(msg){
 }
 */
 
-export function softban(msg){
+export function softbanMembers(msg, bot){
   let args = msg.content.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
   let cmdchat = msg.guild.channels.find("name", cmdChannelName);
   if(msg.channel.type == 'dm') { // Limit to guilds only
     return msg.channel.sendMessage("`Unable to use this command in private chat.``");
   }
-  else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
+	else if(!msg.guild.member(bot.user).hasPermssion("BAN_MEMBERS")){ //check if bot has permission to ban members
+		msg.channel.sendMessage("Unable to complete request to move members, I don't have the necessary permissions `BAN_MEMBERS`\n An admin or server owner must change this before you are able to user this command.`");
+	}
+  else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat if exist
     return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
-  else if(!msg.member.hasPermission("banMembers") || !msg.member.hasPermssion("kickMembers")) { //limit to admin only
+  else if(!msg.member.hasPermission("BAN_MEMBERS") || !msg.member.hasPermssion("KICK_MEMBERS")) { //limit to members with persmission
     badUserToModlog(msg, "softban");
-    return msg.reply(`You pleb, you don't have permission to use this command \`${PREFIX}softban\``); //insult unauthorized user
+    return msg.reply(`You pleb, you don't have permission to use this command \`${PREFIX}softban\``);
   }
-  else if(args.length < 2 || !msg.mentions.users.first()) {
-    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}softban [user] [reason]\``); //check for user, and reason
+  else if(args.length < 2 || !msg.mentions.users.first()) {//check for all fiewls
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}softban [user] [reason]\``);
   }
-    msg.delete().catch(console.error); //delete message from chat
-    let userToKick = msg.mentions.users.first(); //set user to ban
-    let kickMsg = args.join(" "); //set reason to arguments minus user
-  if(sendToDM(msg, "Soft Banned", 16733186, userToKick, kickMsg)) {
-    msg.guild.ban(userToKick.id, kickMsg); //ban the mentioned user
-    msg.guild.unban(userToKick.id, "Soft Ban Only"); //unban the mentioned user
+    msg.delete().catch(console.error);
+    let userToKick = msg.mentions.users.first();
+    let kickMsg = args.join(" ");
+  if(sendToDM(msg, "Soft Banned", 16733186, userToKick, kickMsg)) { //check if user exist
+    msg.guild.ban(userToKick.id, kickMsg);
+    msg.guild.unban(userToKick.id, "Soft Ban Only");
     usersRemoved.push(userToKick);
     if(!sendToModlog(msg, "Soft Banned", 16733186, userToKick, kickMsg)) {
       msg.channel.sendMessage("Unable to find #mod_log text channel, please consult an admin or server owner.");
@@ -223,27 +235,27 @@ export function softban(msg){
   }
 }
 
-export function warn(msg){
+export function warnMembers(msg){
   let args = msg.content.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
   let cmdchat = msg.guild.channels.find("name", "commands");
-  if(msg.channel.type == 'dm'){
+  if(msg.channel.type == 'dm'){ //limit to guilds only
     return msg.channel.sendMessage("Unable to use this command in private chat.");
   }
-  else if(cmdChat && msg.channel.name != "commands") {
+  else if(cmdChat && msg.channel.name != "commands") { //limit to command chat if exist
     return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
-  else if(!msg.member.hasPermission("muteMembers") && !msg.member.hasPermission("deafenMembers")) { //limit to members that can ban in that quild
+  else if(!msg.member.hasPermission("MUTE_MEMBERS") && !msg.member.hasPermission("DEAFEN_MEMBERS")) { //limit to memebrs that can mute or deafen members
     badUserToModlog(msg, "Warn");
-    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}warn\``); //insult unauthorized user
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}warn\``);
   }
-  else if(args.length < 2) {
-    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}warn [user] [reason]\``); //check for user, and reason
+  else if(args.length < 2) { //check for all fields
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}warn [user] [reason]\``);
   }
-  msg.delete().catch(console.error); //delete message from chat
-  let userToWarn = msg.mentions.users.first(); //set user to warn
-  let warnMsg = args.slice(1).join(" "); //set reason to arguments minus user
-  if(sendToDM(msg, "Warned", 16774400, userToWarn, warnMsg)) {
+  msg.delete().catch(console.error);
+  let userToWarn = msg.mentions.users.first();
+  let warnMsg = args.slice(1).join(" ");
+  if(sendToDM(msg, "Warned", 16774400, userToWarn, warnMsg)) { // check if user exist
     if(!sendToModlog(msg, "Warned", 16774400, userToWarn, warnMsg)) {
       msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.")
     }
@@ -255,23 +267,28 @@ export function warn(msg){
   }
 }
 
-export function purge(msg){
+export function pruneMembers(msg, bot){
   let args = msg.content.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
   let cmdchat = msg.guild.channels.find("name", cmdChannelName);
-  if(msg.channel.type == "dm") {
+  if(msg.channel.type == "dm") { //limit to guilds only
     return msg.reply("Unable to use this command in private chat.");
   }
+	else if(!msg.guild.member(bot.user).hasPermssion("KICK_MEMBERS")){ //check if bot has permission to kick members
+		return msg.channel.sendMessage("Unable to complete request to move members, I don't have the necessary permissions `KICK_MEMBERS`\n An admin or server owner must change this before you are able to user this command.`");
+	}
   else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
     return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
-	else if(!msg.member.hasPermission("kickMembers")) { //limit to admin only
+	else if(!msg.member.hasPermission("KICK_MEMBERS")) { //limit to members that can kick memebrs
 		badUserToModlog(msg, "prune");
-		return msg.reply("You pleb, you don't have permission to use this command `?purge`."); //insult unauthorized user
+		return msg.reply(`You pleb, you don't have permission to use this command \`${PREFIX}prune\`.`);
 	}
-	else if(args.length < 1) msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`"); //check for user, and reason
-	try{
-		msg.guild.pruneMembers(arg[0],false,"Removed for inactivity.").then(pruned =>{
+	else if(args.length != 1 || isNan(args[0])) { //check for all fields
+		msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}prune [days]\``);
+	}
+	try { //check if args[0] is a number
+		msg.guild.pruneMembers(arg[0],false,"Removed for inactivity").then(pruned =>{
       if(modlog) {
         modlog.sendMessage(`I just pruned ${pruned} members!`);
       }
@@ -279,8 +296,9 @@ export function purge(msg){
         msg.channel.sendMessage(`I just pruned ${pruned} members!`);
       }
     });
-	} catch(e) {
-		msg.channel.sendMessage("You did not define an argument. Usage: `?purge [days]`");
+	}
+	catch(e) {
+		msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}prune [days]\``);
 		deleteAfterTime(msg, 2000, 2);
 		console.error(e);
 	}
@@ -319,13 +337,18 @@ export function memberAdd(mem){//New member joined
 }
 
 export function memberLeave(mem){ //Member leaves/kicked
-  usersRemoved.map(user =>{
+  let length = usersRemoved.length;
+  usersRemoved = usersRemoved.map(user =>{
     if(user.id == mem.id){
-      let index = usersRemoved.indexOf(mem);
-      usersRemoved.splice(index, 1);
-      return;
+      return false;
     }
-  })
+    else{
+      return true;
+    }
+  });
+  if(usersRemoved.length != length){
+    return;
+  }
   var modlog = mem.guild.channels.find("name"."mod_log");
   if(!modlog)
     modlog = mem.guild.defaultChannel;
