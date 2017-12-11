@@ -1,6 +1,8 @@
 exports.apply = (PREFIX, msg) => {
   msg.delete().catch(console.error); //delete message from chat
+  let args = msg.content.trim().split(/ +/g).slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
+  let reasonFor = args.slice(1).join(" ");
   if(args.length < 2) {
     return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}apply [role] [reason]\``); //check for role, reason
   }

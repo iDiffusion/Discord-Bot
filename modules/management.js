@@ -1,4 +1,3 @@
-const config = require("/config/config.json"); // import the config file
 const cmdChannelName = "commands";
 
 function deleteAfterTime(msg, timer, num){
@@ -17,7 +16,7 @@ function sendToModlog(msg, type, color, user, message) {
 				name: user.username,
 				icon_url: user.avatarURL
 			},
-			title: `User ${type.charAt(0).toUpperCase()}`,
+			title: `User ${type.charAt(0).toUpperCase() + type.slice(1)}`,
 			description: `${msg.author} has ${type.toLowerCase()} ${user}`,
 			fields: [{
 				name: `Reason`,
@@ -40,8 +39,8 @@ function sendToDM(msg, type, color, user, message) {
 				name: msg.guild.name,
 				icon_url: msg.guild.iconURL
 			},
-			title: type.charAt(0).toUpperCase(),
-			description: `You have been ${type.toLowerCase()} by ${msg.member.highestRole}`,
+			title: type.charAt(0).toUpperCase() + type.slice(1),
+			description: `You have been ${type.toLowerCase()} by an Admin`,
 			fields: [{
 				name:'Reason',
 				value: message
@@ -79,9 +78,9 @@ function badUserToModlog(msg, func){
 }
 
 exports.banMembers = (PREFIX, msg, bot, usersRemoved) => {
-  let args = msg.content.split(" ").slice(1);
+  let args = msg.cleanContent.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
-  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
+  let cmdChat = msg.guild.channels.find("name", cmdChannelName);
   if(msg.channel.type == 'dm') { // Limit to guilds only
     msg.channel.sendMessage("Unable to use this command in private chat.");
   }
@@ -102,7 +101,7 @@ exports.banMembers = (PREFIX, msg, bot, usersRemoved) => {
     msg.delete().catch(console.error);
     let userToBan = msg.mentions.users.first();
     let banMsg = args.join(" ");
-    if(sendToDM(msg, "banned", 16721408, userToBan, banMsg){ // check if user exist
+    if(sendToDM(msg, "banned", 16721408, userToBan, banMsg)){ // check if user exist
       msg.guild.member(userToBan).ban(banMsg);
       usersRemoved.push(userToBan);
       if(!sendToModlog(msg, "banned", 16721408, userToBan, banMsg)) {
@@ -118,9 +117,9 @@ exports.banMembers = (PREFIX, msg, bot, usersRemoved) => {
 }
 
 exports.kickMembers = (PREFIX, msg, bot, usersRemoved) => {
-  let args = msg.content.split(" ").slice(1);
+  let args = msg.cleanContent.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
-  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
+  let cmdChat = msg.guild.channels.find("name", cmdChannelName);
   if(msg.channel.type == 'dm') { // Limit to guilds only
     msg.channel.sendMessage("Unable to use this command in private chat.");
   }
@@ -130,7 +129,7 @@ exports.kickMembers = (PREFIX, msg, bot, usersRemoved) => {
   else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
     msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
-  else if(!msg.member.hasPermssion("kickMembers")) { //limit to memebrs that can kick in that quild
+  else if(!msg.member.hasPermission("KICK_MEMBERS")) { //limit to memebrs that can kick in that quild
     badUserToModlog(msg, "kick");
     msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}kick\``);
   }
@@ -195,9 +194,9 @@ exports.moveMembers = (PREFIX, msg, bot) => {
 }
 
 exports.softbanMembers = (PREFIX, msg, bot, usersRemoved) => {
-  let args = msg.content.split(" ").slice(1);
+  let args = msg.cleanContent.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
-  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
+  let cmdChat = msg.guild.channels.find("name", cmdChannelName);
   if(msg.channel.type == 'dm') { // Limit to guilds only
     msg.channel.sendMessage("`Unable to use this command in private chat.``");
   }
@@ -235,7 +234,7 @@ exports.softbanMembers = (PREFIX, msg, bot, usersRemoved) => {
 }
 
 exports.warnMembers = (PREFIX, msg) => {
-  let args = msg.content.split(" ").slice(1);
+  let args = msg.cleanContent.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
   let cmdchat = msg.guild.channels.find("name", "commands");
   if(msg.channel.type == 'dm'){ //limit to guilds only
@@ -266,7 +265,8 @@ exports.warnMembers = (PREFIX, msg) => {
   }
 }
 
-exports.pruneMembers = (PREFIX, msg, bot) => {
+exports.prune = (PREFIX, msg, bot) => {
+  return;
   let args = msg.content.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
   let cmdchat = msg.guild.channels.find("name", cmdChannelName);
@@ -319,8 +319,8 @@ exports.memberAdded = (mem, guild) => {//New member joined
     let msgToSend = config.welcome_msg.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user). replace(/$mention/gi, mem.user.username);
     mem.guild.channels.find("name", "general").sendMessage(msgToSend);
   }
-  var modlog = mem.guild.channels.find("name"."mod_log");
-  if(!modlog)
+  var modlog = mem.guild.channels.find("name","mod_log");
+  if(!modlog){
     modlog = mem.guild.defaultChannel;
   }
   modlog.sendEmbed({
@@ -341,8 +341,8 @@ exports.memberRemoved = (mem, guild, usersRemoved) => { //Member leaves/kicked
   if(usersRemoved.length != length) {
     return usersRemoved;
   }
-  var modlog = mem.guild.channels.find("name"."mod_log");
-  if(!modlog)
+  var modlog = mem.guild.channels.find("name","mod_log");
+  if(!modlog){
     modlog = mem.guild.defaultChannel;
   }
   modlog.sendEmbed({
@@ -364,7 +364,7 @@ exports.memberBanned = (mem, guild, usersRemoved) => { //Member Ban
   if(usersRemoved.length != length) {
     return usersRemoved;
   }
-  var modlog = mem.guild.channels.find("name"."mod_log");
+  var modlog = mem.guild.channels.find("name","mod_log");
   if(!modlog) {
     modlog = mem.guild.defaultChannel;
   }

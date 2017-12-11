@@ -1,9 +1,15 @@
+function deleteAfterTime(msg, timer, num){
+  msg.channel.fetchMessages({limit: num}).then(msg => { // get the channel logs
+    let msg_array = msg.array(); //create an array for messages
+    msg_array.length = num;//limit to the requested number + 1 for the command message
+    msg_array.map(m => m.delete(timer).catch(console.error));//has to delete messages individually.
+  });
+}
 
 exports.cleanMessages = (PREFIX, msg, bot) => {
   msg.channel.fetchMessages()
-  .filter(message => message.id = bot.id)
   .then(message => { // get the channel logs
-    let msg_array = message.array(); //create an array for messages
+    let msg_array = message.array().filter(message => message.id == bot.id); //create an array for messages
     msg_array.map(m => m.delete().catch(console.error));//has to delete messages individually.
   });
 }
@@ -98,7 +104,7 @@ exports.invite = (PREFIX, msg, bot, config, auth) => {
 }
 
 exports.ping = (PREFIX, msg, bot) => {
-  msg.channel.sendMessage(`pong!\`${bot.ping}\``);
+  msg.channel.sendMessage(`pong!\`${bot.ping}ms\``);
 }
 
 exports.purge = (PREFIX, msg, bot) => {
@@ -120,14 +126,13 @@ exports.purge = (PREFIX, msg, bot) => {
     return msg.channel.sendMessage(args[0] + " is not a number.");
   }
   else {
-    let messagecount = parseInt(args[0]); //fetch the number of messages to prune
-    msg.channel.fetchMessages({limit: mdLimit}).then(msg => { // get the channel logs
-      let msg_array = msg.array(); //create an array for messages
-      msg_array.length = messagecount < mdLimit ? messagecount + 1: mdLimit;//limit to the requested number + 1 for the command message
-      msg_array.map(m => m.delete().catch(console.error));//has to delete messages individually.
-    });
+    try{
+    let messagecount = parseInt(args[0]).catch(console.error); //fetch the number of messages to prune
+    deleteAfterTime(msg, 0, messagecount + 1);
     msg.channel.sendMessage(`${messagecount} messages have been deleted.`).catch(console.error);
     deleteAfterTime(msg, 2000, 1);
+  }
+    catch(err){}
   }
 }
 

@@ -35,7 +35,7 @@ bot.on('ready', () => { //Display ready when bot is active
 });
 
 bot.on("message", msg => { //Scan messages in text channels
-  var PREFIX = auth.prefix;
+  var PREFIX = config.prefix;
   if(msg.channel.type != 'text') return; //If messages is in text channel continue
   else if(msg.content.startsWith(PREFIX + " ")) return; //If starts with prefix then space return
   else if(!msg.content.startsWith(PREFIX)) return; //If has prefix continue
@@ -47,7 +47,7 @@ bot.on("message", msg => { //Scan messages in text channels
     //text chat
     case 'apply':
     case 'app':
-    basic.applyRole(PREFIX, msg);
+    basic.apply(PREFIX, msg);
     break;
 
     //text chat
@@ -123,7 +123,7 @@ bot.on("message", msg => { //Scan messages in text channels
 
     //text chat (my guilds only)
     case 'prisolis':
-    fun.prisolis(PREFIX, msg);
+    fun.prisolis(PREFIX, msg, bot, config);
     break;
 
     //text chat
@@ -150,7 +150,7 @@ bot.on("message", msg => { //Scan messages in text channels
 
     // text chat
     case "rps":
-    fun.rps(PREFIX, msg);
+    fun.rps(PREFIX, msg, bot);
     break;
 
     //text chat
@@ -198,6 +198,7 @@ bot.on("message", msg => {
   else if(msg.author.bot) return; //If not a bot continue
 
   var command = [];
+
   command.push(msg.content.substr(1).split(/ +/g)[0]);
   command.push(msg.content.split(/ +/g)[0]);
 
@@ -264,16 +265,16 @@ bot.on("message", msg => {
 
 bot.on("guildMemberAdd", mem => { //Member joins guils
   let guild =  mem.guild;
-  memberAdded(mem, guild);
+  manage.memberAdded(mem, guild);
 });
 
 bot.on("guildMemberRemove", mem => { //Member leaves/kicked
   let guild =  mem.guild;
-  memberRemoved(mem, guild, usersRemoved);
+  manage.memberRemoved(mem, guild, usersRemoved);
 });
 
 bot.on("guildBanAdd", (guild, mem) => { //Member Banned
-  memberBanned(mem, guild, usersRemoved);
+  manage.memberBanned(mem, guild, usersRemoved);
 });
 
 /*
@@ -295,7 +296,7 @@ bot.on("guildMembersChunk", (mem, guild) => { //Members joins guild
 });
 
 bot.on("guildMemberUpdate", (oldMem, newMem) => { //Member updates info
-  memberUpdated(oldMem, newMem);
+  manage.memberUpdated(oldMem, newMem);
 });
 
 bot.on("guildUpdate", (oldGuild, newGuild) => { //Guild updates info
@@ -309,5 +310,5 @@ bot.on("presenceUpdate", (oldMem, newMem) => { //Member updates presence
 */
 
 bot.on("userUpdate", (oldMem, newMem) => { //Member updats info
-  memberUpdated(oldMem, newMem);
+  manage.memberUpdated(oldMem, newMem);
 });

@@ -22,25 +22,28 @@ exports.coinFlip = (PREFIX, msg) => {
 }
 
 //THIS FUNCTION IS FINISHED
-exports.prisolis = (PREFIX, msg) => {
+exports.prisolis = (PREFIX, msg, bot, config) => {
   let channelName = "Story Time w/ Mr.Z";
   if(msg.guild.id != config.guild_id) { //limit to my guilds
     return;
   }
-  if(msg.author.id != 222883669377810434 && !msg.member.hasPermssion("manageChannels")) {
+  else if(!msg.guild.member(bot.user).hasPermission("MANAGE_CHANNELS")) { // check if bot has permission
+		return msg.channel.sendMessage("Unable to complete request to ban members, I don't have the necessary permissions: `BAN_MEMBERS`\n An admin or server owner must change this before you are able to use this command.");
+	}
+  else if(msg.author.id != 222883669377810434 && !msg.member.hasPermission("MANAGE_CHANNELS)")) {
     return msg.reply(`You pleb, you don't have permission to this command \`${PREFIX}prisolis\`.`);
   }
-  if(msg.channel.name != cmdChannelName && msg.guild.channels.find("name", cmdChannelName)) {
+  else if(msg.channel.name != cmdChannelName && msg.guild.channels.find("name", cmdChannelName)) {
     return msg.delete();
   }
   let storyTime = msg.guild.channels.find("name", channelName);
-  if(!storyTime){
+  if(!storyTime) {
     msg.guild.createChannel(channelName, "voice", [
       {'id': '212630495098437633', 'type': 'role', 'deny': 0, 'allow': 871366673},
       {'id': '212624757818916864', 'type': 'role', 'deny': 838860816, 'allow': 3145729},
       {'id': '222883669377810434', 'type': 'member', 'deny': 536870928, 'allow': 334495745}]
     );
-    msg.channel.sendMessage("Voice channel named `" + channelName + "` has been created. Use `?prisolis` to delete the channel after use.");
+    return msg.channel.sendMessage("Voice channel named `" + channelName + "` has been created. Use `?prisolis` to delete the channel after use.");
   }
   else {
     try {
@@ -59,7 +62,7 @@ exports.tabletop = (PREFIX, msg) => {
   if(msg.guild.id != 212624757818916864) { //limit to my guilds
     return msg.delete.catch(console.error);
   }
-  else if(!msg.member.hasPermssion("manageChannels")){
+  else if(!msg.member.hasPermission("MANAGE_CHANNELS")){
     return msg.reply("You pleb, you don't have permission to use this command `?tabletop`.");
   }
   else if(msg.channel.name != cmdChannelName) {
@@ -89,7 +92,7 @@ exports.letsplay = (PREFIX, msg) => {
 }
 
 //THIS FUNCTION IS FINISHED
-exports.rps = (PREFIX, msg) => {
+exports.rps = (PREFIX, msg, bot) => {
   let args = msg.cleanContent.split(" ").slice(1);
   if(args.length == 0) return msg.reply(`You did not define an argument. Usage \`${PREFIX}rps [rock/paper/scissors]\``);
   var userChoice = args[0].toLowerCase();
@@ -124,30 +127,24 @@ exports.rps = (PREFIX, msg) => {
 }
 
 //THIS FUNCTION IS FINISHED
-exports.reverse = (PREFIX, msg) =>{
+exports.reverseMessage = (PREFIX, msg) =>{
   let args = msg.cleanContent.split(" ").slice(1).join(" ").split("");
   args.reverse();
   msg.reply(`Your message reversed is **${args.join("")}**.`);
 }
 
 //MAY ADD MULTIPLE DIFFERENT SIDED DIE IN ONE COMMAND
-exports.rollDice = (PREFIX, msg) => {
+exports.rolldice = (PREFIX, msg) => {
   let args = msg.cleanContent.split(" ").slice(1);
   let numLimit = 10;
-  let sideLImit = 100;
-  if(args.length != 1){ // limit to only one argument
-    return msg.reply(`You did not define an argument. Usage \`${PREFIX}rollDice [number]d[number]\``);
-  }
-  else if(isNaN(args[0])){ //check if d is present
-    args.split("d");
-    if(args.length != 2) { //if unable to split string
-      return msg.reply(`You did not define an argument. Usage \`${PREFIX} rollDice [number]d[number]\``);
+  let sideLimit = 100;
+  try {
+    if(args[0].indexOf('d') != -1) {
+      args = args.join(" ").split('d');
     }
-  }
-  else {// if only a number is present
-    args[1] = 6;
-  }
-  try{
+    else {
+      args.push("6");
+    }
     var valArray = [];
     args[0] = args[0] < numLimit ? args[0] : numLimit;
     for(i = 1; i <= args[0]; i++){ //repeat for the number of die
@@ -162,7 +159,8 @@ exports.rollDice = (PREFIX, msg) => {
     let average = sum/valArray.length;
     msg.reply(`Your rolls are \`${valArray.join(", ")}\` \n The sum is **${sum}** and the average is **${average}**.`);
   }
-  catch(e){
-    return msg.reply(`You did not define an argument. Usage \`${PREFIX}rollDice [number]d[number]\` or \`${PREFIX}rollDice [number]\``);
+  catch(err){
+    return console.log(err);
+    return msg.reply(`You did not define an argument. Usage \`${PREFIX}rollDice [number]d[number]\``);
   }
 }
