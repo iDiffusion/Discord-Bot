@@ -9,11 +9,11 @@ const bot = new Discord.Client(); //create an instance of a Discord Client, and 
 const auth = require("./auth.json"); // import the authorzation file
 const config = require("./config/config.json"); // import the config file
 
-import * as utility from '/modules/utility';
-import * as fun from '/modules/fun';
-import * as music from '/modules/music';
-import * as basic from '/modules/basic';
-import * as management from '/modules/management';
+const utils = require("./modules/utiliy.js");
+const fun = require("./modules/fun.js");
+const basic = require("./modules/basic.js");
+const setup = require("./modules/config.js");
+const manage = require("./modules/management.js");
 
 var usersRemoved = [];
 const editingCode = true;
@@ -48,12 +48,12 @@ bot.on("message", msg => { //Scan messages in text channels
     //text chat
     case 'apply':
     case 'app':
-    applyRole(PREFIX, msg);
+    basic.applyRole(PREFIX, msg);
     break;
 
     //text chat
     case 'ban':
-    usersRemoved = banMembers(PREFIX, msg, bot, usersRemoved);
+    usersRemoved = manage.banMembers(PREFIX, msg, bot, usersRemoved);
     break;
 
     //text chat

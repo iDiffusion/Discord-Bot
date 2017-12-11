@@ -1,21 +1,4 @@
-var cmd, args;
-var modRole, adminRole, staffRole;
-var modlog, cmdchat;
-const config = require("./config.json"); // import the config file
-
-export function update(msg){
-  cmd = msg.content.substr(1).split(" ")[0];
-  args = msg.content.split(" ").slice(1);
-	
-  modlog = msg.guild.channels.find("name", "mod_log");
-  cmdchat = msg.guild.channels.find("name", "commands");
-
-  modRole = msg.guild.roles.find("name", "Mod"); //Assign Mod to modRole
-  adminRole = msg.guild.roles.find("name", "Admin"); //Assign Admin to adminRole
-  staffRole = msg.guild.roles.find("name", "Staff"); //Assign Staff to staffRole
-}
-
-export function apply(msg){
+exports.apply = (PREFIX, msg) => {
   msg.delete().catch(console.error); //delete message from chat
   if(args.length < 2) {
     return msg.channel.sendMessage("You did not define an argument. Usage: `?apply [role] [reason]`"); //check for role, reason
@@ -41,4 +24,6 @@ export function apply(msg){
   }
 }
 
- 
+exports.giveaway = (PREFIX, msg) => {
+  return msg.channel.sendMessages(`This command is currently unavaiiable, if you wish to know when this command will be implemented feel free to message me.`);
+}
