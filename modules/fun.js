@@ -91,7 +91,7 @@ exports.letsplay = (PREFIX, msg) => {
 //THIS FUNCTION IS FINISHED
 exports.rps = (PREFIX, msg) => {
   let args = msg.cleanContent.split(" ").slice(1);
-  if(args.length == 0) return msg.reply("You did not define an argument. Usage `?rps [rock/paper/scissors]`");
+  if(args.length == 0) return msg.reply(`You did not define an argument. Usage \`${PREFIX}rps [rock/paper/scissors]\``);
   var userChoice = args[0].toLowerCase();
   var choices = ["rock", "paper", "scissors"];
   var computerChoice = underscore.sample(choices);
@@ -141,7 +141,7 @@ exports.rollDice = (PREFIX, msg) => {
   else if(isNaN(args[0])){ //check if d is present
     args.split("d");
     if(args.length != 2) { //if unable to split string
-      return msg.reply("You did not define an argument. Usage \`${PREFIX} rollDice [number]d[number]`");
+      return msg.reply(`You did not define an argument. Usage \`${PREFIX} rollDice [number]d[number]\``);
     }
   }
   else {// if only a number is present
