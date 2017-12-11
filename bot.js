@@ -17,7 +17,6 @@ const manage = require("./modules/management.js");
 
 var usersRemoved = [];
 const editingCode = true;
-const PREFIX = '?';
 
 bot.login(auth.token);//Login to bot
 bot.on('error', e => { console.error(e); }); //log error to console
@@ -36,9 +35,9 @@ bot.on('ready', () => { //Display ready when bot is active
 );
 
 bot.on("message", msg => { //Scan messages in text channels
-  var PREFIX = auth.prefix;
+  var config.PREFIX = auth.prefix;
   if(msg.channel.type != 'text') return; //If messages is in text channel continue
-  if(msg.content.startsWith(PREFIX + " ")) return; //If starts with prefix then space return
+  else if(msg.content.startsWith(PREFIX + " ")) return; //If starts with prefix then space return
   else if(!msg.content.startsWith(PREFIX)) return; //If has prefix continue
   else if(msg.author.bot) return; //If not a bot continue
 
@@ -59,7 +58,7 @@ bot.on("message", msg => { //Scan messages in text channels
     //text chat
     case 'choose':
     case 'pick':
-    choose(PREFIX, msg);
+    fun.choose(PREFIX, msg);
     break;
 
     //text chat
@@ -67,131 +66,130 @@ bot.on("message", msg => { //Scan messages in text channels
     case 'flip':
     case 'coinflip':
     case 'cointoss':
-    coinFlip(PREFIX, msg);
+    fun.coinFlip(PREFIX, msg);
     break;
 
     //any chat
     case 'commands':
     case 'cmds':
-    commands(PREFIX, msg);
+    utils.commands(PREFIX, msg);
     break;
 
     //text chat
     case 'giveaway':
-    giveaway(PREFIX, msg);
+    basic.giveaway(PREFIX, msg);
     break;
 
     //any chat
     case 'help':
     case 'h':
-    help(PREFIX, msg);
+    utils.help(PREFIX, msg);
     break;
 
     //any chat
     case 'info':
     case 'i':
     case '411':
-    information(PREFIX, msg);
+    utils.information(PREFIX, msg);
     break;
 
     //any chat
     case 'invite':
     case 'inv':
-    invite(PREFIX, msg);
+    utils.invite(PREFIX, msg);
     break;
 
     //text chat
     case 'kick':
-    usersRemoved = kickMembers(PREFIX, msg, bot, usersRemoved);
+    usersRemoved = manage.kickMembers(PREFIX, msg, bot, usersRemoved);
     break;
 
     //text chat
     case 'letsplay':
     case 'lp':
-    letsplay(PREFIX, msg);
+    fun.letsplay(PREFIX, msg);
     break;
 
     //text chat
     case 'move':
     case 'm':
-    moveMembers(PREFIX, msg, bot);
+    manage.moveMembers(PREFIX, msg, bot);
     break;
 
     //any chat
     case 'ping':
-    ping(PREFIX, msg);
+    utils.ping(PREFIX, msg);
     break;
 
     //text chat (my guilds only)
     case 'prisolis':
-    prisolis(PREFIX, msg);
+    fun.prisolis(PREFIX, msg);
     break;
 
     //text chat
     case 'prune':
-    prune(PREIFX, msg);
+    manage.prune(PREIFX, msg);
     break;
 
     //text chat
     case 'purge':
-    purge(PREFIX, msg);
+    utils.purge(PREFIX, msg);
     break;
 
     //text chat
     case 'reverse':
-    reverseMessage(PREFIX, msg);
+    fun.reverseMessage(PREFIX, msg);
     break;
 
     //text chat
     case 'roll':
     case 'rolldice':
     case 'dice':
-    rolldice(PREFIX, msg);
+    fun.rolldice(PREFIX, msg);
     break;
 
     // text chat
     case "rps":
-    rps(PREFIX, msg);
+    fun.rps(PREFIX, msg);
     break;
 
     //text chat
     case 'say':
     case 'speak':
-    say(PREFIX, msg);
+    utils.say(PREFIX, msg);
     break;
 
     //any chat
     case 'set':
-    setBot(PREFIX, msg);
+    setup.setBot(PREFIX, msg);
     break;
 
     //text chat
     case 'softban':
-    usersRemoved = softBanMembers(PREFIX, msg, bot);
+    usersRemoved = manage.softBanMembers(PREFIX, msg, bot);
     break;
 
     //any chat
     case 'status':
-    statusBot(PREFIX, msg);
+    setup.statusBot(PREFIX, msg);
     break;
 
     //any chat
     case 'suggestion':
-    makeSuggestion(PREFIX, msg);
+    utils.makeSuggestion(PREFIX, msg);
     break;
 
     //text chat
     case 'tabletop':
     case 'tt':
-    tabletop(PREFIX, msg);
+    fun.tabletop(PREFIX, msg);
     break;
 
     //text chat
     case 'warn':
-    warnMembers(PREFIX, msg);
+    manage.warnMembers(PREFIX, msg);
     break;
   }
-  addMessageLog(msg);
 });
 
 bot.on("message", msg => {
@@ -206,58 +204,58 @@ bot.on("message", msg => {
   switch(cmd){
     //dm chat
     case 'clean':
-    cleanMessages(PREFIX, msg);
+    utils.cleanMessages(PREFIX, msg);
     goto checkDone;
 
     //any chat
     case 'commands':
     case 'cmds':
-    commands(PREFIX, msg);
+    utils.commands(PREFIX, msg);
     goto checkDone;
 
     //dm chat
     case 'eval':
     case 'e':
-    evalcmd(PREFIX);
+    setup.evalcmd(PREFIX);
     goTo checkDone;
 
     //any chat
     case 'help':
     case 'h':
-    help(PREFIX, msg);
+    utils.help(PREFIX, msg);
     goto checkDone;
 
     //any chat
     case 'info':
     case 'i':
     case '411':
-    information(PREFIX, msg);
+    utils.information(PREFIX, msg);
     goto checkDone;
 
     //any chat
     case 'invite':
     case 'inv':
-    invite(PREFIX, msg);
+    utils.invite(PREFIX, msg);
     goto checkDone;
 
     //any chat
     case 'ping':
-    ping(PREFIX, msg);
+    utils.ping(PREFIX, msg);
     goto checkDone;
 
     //any chat
     case 'set':
-    setBot(PREFIX, msg);
+    setup.setBot(PREFIX, msg);
     goto checkDone;
 
     //any chat
     case 'status':
-    statusBot(PREFIX, msg);
+    setup.statusBot(PREFIX, msg);
     goto checkDone;
 
     //any chat
     case 'suggestion':
-    makeSuggestion(PREFIX, msg);
+    utils.makeSuggestion(PREFIX, msg);
     goto checkDone;
 
     default:
