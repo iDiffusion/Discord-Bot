@@ -133,6 +133,7 @@ export function reverse(msg){
 //MAY ADD MULTIPLE DIFFERENT SIDED DIE IN ONE COMMAND
 export function rollDice(msg){
   let args = msg.cleanContent.split(" ").slice(1);
+  let limit = 10;
   if(args.length != 1){
     return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]`");
   }
@@ -147,9 +148,9 @@ export function rollDice(msg){
   }
   try{
     var valArray = [];
-    args[0] = args[0] < 100 ? args[0] : 100;
+    args[0] = args[0] < limit ? args[0] : limit;
     for(int i = 1; i <= args[0]; i++){
-      args[1] = args[1] < 100 ? args[1] : 100;
+      args[1] = args[1] < limit ? args[1] : limit;
       let tempVal = Math.floor(Math.random() * args[1]) + 1;
       if(tempVal == args[1] + 1){
         tempVal = args[1];
@@ -161,6 +162,6 @@ export function rollDice(msg){
     msg.reply(`Your rolls are \`${valArray.join(", ")}\` \n The sum is **${sum}** and the average is **${average}**.`);
   }
   catch(e){
-    return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]`");
+    return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]` or `?rollDice [number]`");
   }
 }
