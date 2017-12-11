@@ -2,33 +2,33 @@ const underscore = require("underscore.js");
 const cmdChannelName = "commands";
 
 //THIS FUNCTION IS FINISHED
-export function choose(msg){
+exports.choose  = (PREFIX, msg) => {
   if(msg.channel.name != cmdChannelName) {
     msg.delete();
   }
   let args = msg.content.split(" ").slice(1).join(" ").split(",");
   if(args.length == 0) {
-    return msg.channel.sendMessage("You did not define an argument. Usage: `?choose [choice1, choice2, ....]`");
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}choose [choice1, choice2, ....]\``);
   }
   let result = underscore.sample(args);
   return msg.reply(`I choose **${result}**.`);
 }
 
 //THIS FUNCTION IS FINISHED
-export function coinFlip(msg){
+exports.coinFlip = (PREFIX, msg) => {
   let choices = ["Head", "Tail"];
   let result = underscore.sample(choices);
   return msg.channel.sendMessage(`Result is ${result}.`);
 }
 
 //THIS FUNCTION IS FINISHED
-export function prisolis(msg) {
+exports.prisolis = (PREFIX, msg) => {
   let channelName = "Story Time w/ Mr.Z";
-  if(msg.guild.id != 212624757818916864) {
+  if(msg.guild.id != config.guild_id) { //limit to my guilds
     return;
   }
   if(msg.author.id != 222883669377810434 && !msg.member.hasPermssion("manageChannels")) {
-    return msg.reply("You pleb, you don't have permission to this command `?prisolis`.");
+    return msg.reply(`You pleb, you don't have permission to this command \`${PREFIX}prisolis\`.`);
   }
   if(msg.channel.name != cmdChannelName && msg.guild.channels.find("name", cmdChannelName)) {
     return msg.delete();
@@ -55,8 +55,8 @@ export function prisolis(msg) {
 }
 
 //NEED TO ALLOW OTHER GUILDS TO USE THIS FUNCTION
-export function tabletop(msg) {
-  if(msg.guild.id != 212624757818916864) {
+exports.tabletop = (PREFIX, msg) => {
+  if(msg.guild.id != 212624757818916864) { //limit to my guilds
     return msg.delete.catch(console.error);
   }
   else if(!msg.member.hasPermssion("manageChannels")){
@@ -80,7 +80,7 @@ export function tabletop(msg) {
 }
 
 //THIS FUNCTION IS FINISHED
-export function letsplay(msg){
+exports.letsplay = (PREFIX, msg) => {
   let args = msg.content.split(" ").slice(1);
   msg.delete();
   if(msg.member.roles.array().length == 1) return msg.reply("You must have at least one role to be eligible for this channel.");
@@ -89,7 +89,7 @@ export function letsplay(msg){
 }
 
 //THIS FUNCTION IS FINISHED
-export function rps(msg){
+exports.rps = (PREFIX, msg) => {
   let args = msg.cleanContent.split(" ").slice(1);
   if(args.length == 0) return msg.reply("You did not define an argument. Usage `?rps [rock/paper/scissors]`");
   var userChoice = args[0].toLowerCase();
@@ -124,35 +124,36 @@ export function rps(msg){
 }
 
 //THIS FUNCTION IS FINISHED
-export function reverse(msg){
+exports.reverse = (PREFIX, msg) =>{
   let args = msg.cleanContent.split(" ").slice(1).join(" ").split("");
   args.reverse();
   msg.reply(`Your message reversed is **${args.join("")}**.`);
 }
 
 //MAY ADD MULTIPLE DIFFERENT SIDED DIE IN ONE COMMAND
-export function rollDice(msg){
+exports.rollDice = (PREFIX, msg) => {
   let args = msg.cleanContent.split(" ").slice(1);
-  let limit = 10;
-  if(args.length != 1){
-    return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]`");
+  let numLimit = 10;
+  let sideLImit = 100;
+  if(args.length != 1){ // limit to only one argument
+    return msg.reply(`You did not define an argument. Usage \`${PREFIX}rollDice [number]d[number]\``);
   }
-  else if(isNaN(args[0])){
+  else if(isNaN(args[0])){ //check if d is present
     args.split("d");
-    if(args.length != 2) {
-      return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]`");
+    if(args.length != 2) { //if unable to split string
+      return msg.reply("You did not define an argument. Usage \`${PREFIX} rollDice [number]d[number]`");
     }
   }
-  else {
+  else {// if only a number is present
     args[1] = 6;
   }
   try{
     var valArray = [];
-    args[0] = args[0] < limit ? args[0] : limit;
-    for(int i = 1; i <= args[0]; i++){
-      args[1] = args[1] < limit ? args[1] : limit;
+    args[0] = args[0] < numLimit ? args[0] : numLimit;
+    for(int i = 1; i <= args[0]; i++){ //repeat for the number of die
+      args[1] = args[1] < sideLimit ? args[1] : sideLimit;
       let tempVal = Math.floor(Math.random() * args[1]) + 1;
-      if(tempVal == args[1] + 1){
+      if(tempVal == args[1] + 1){ //check for outofbounds case
         tempVal = args[1];
       }
       valArray.push(tempVal);
@@ -162,6 +163,6 @@ export function rollDice(msg){
     msg.reply(`Your rolls are \`${valArray.join(", ")}\` \n The sum is **${sum}** and the average is **${average}**.`);
   }
   catch(e){
-    return msg.reply("You did not define an argument. Usage `?rollDice [number]d[number]` or `?rollDice [number]`");
+    return msg.reply(`You did not define an argument. Usage \`${PREFIX}rollDice [number]d[number]\` or \`${PREFIX}rollDice [number]\``);
   }
 }
