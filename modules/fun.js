@@ -1,4 +1,4 @@
-const underscore = require("underscore.js");
+const underscore = require("underscore");
 const cmdChannelName = "commands";
 
 //THIS FUNCTION IS FINISHED
@@ -150,7 +150,7 @@ exports.rollDice = (PREFIX, msg) => {
   try{
     var valArray = [];
     args[0] = args[0] < numLimit ? args[0] : numLimit;
-    for(int i = 1; i <= args[0]; i++){ //repeat for the number of die
+    for(i = 1; i <= args[0]; i++){ //repeat for the number of die
       args[1] = args[1] < sideLimit ? args[1] : sideLimit;
       let tempVal = Math.floor(Math.random() * args[1]) + 1;
       if(tempVal == args[1] + 1){ //check for outofbounds case

@@ -1,21 +1,3 @@
-var cmd, args;
-var chiefRole, modRole, adminRole, staffRole, seniorRole;
-var modlog, cmdchat;
-const config = require("./config.json"); // import the config file
-
-export function update(msg){
-  cmd = msg.content.substr(1).split(" ")[0];
-  args = msg.content.split(" ").slice(1);
-
-  modlog = msg.guild.channels.find("name", "mod_log");
-  cmdchat = msg.guild.channels.find("name", "commands");
-
-  chiefRole = msg.guild.roles.find("name","Bot Chief"); //Assign Bot Chief to chiefRole
-  modRole = msg.guild.roles.find("name", "Mod"); //Assign Mod to modRole
-  adminRole = msg.guild.roles.find("name", "Admin"); //Assign Admin to adminRole
-  staffRole = msg.guild.roles.find("name", "Staff"); //Assign Staff to staffRole
-  seniorRole = msg.guild.roles.find("name", "Senior Member"); //Assign SeniorMember to seniorRole
-}
 
 export function setGame(msg, args) {
 	if(!msg.user.hasRole(adminRole)) {

@@ -337,7 +337,7 @@ exports.memberAdded = (mem, guild) => {//New member joined
 
 exports.memberRemoved = (mem, guild, usersRemoved) => { //Member leaves/kicked
   let length = usersRemoved.length;
-  usersRemoved = usersRemoved.filter(member => userRemoved.indexOf(mem) != -1);
+  usersRemoved = usersRemoved.filter(member => userRemoved.indexOf(mem) == -1);
   if(usersRemoved.length != length) {
     return usersRemoved;
   }
@@ -360,29 +360,26 @@ exports.memberRemoved = (mem, guild, usersRemoved) => { //Member leaves/kicked
 
 exports.memberBanned = (mem, guild, usersRemoved) => { //Member Ban
   let length = usersRemoved.length;
-  usersRemoved = usersRemoved.filter(member => userRemoved.indexOf(mem) != -1);
+  usersRemoved = usersRemoved.filter(member => userRemoved.indexOf(mem) == -1);
   if(usersRemoved.length != length) {
     return usersRemoved;
   }
   var modlog = mem.guild.channels.find("name"."mod_log");
-  if(!modlog)
+  if(!modlog) {
     modlog = mem.guild.defaultChannel;
   }
   modlog.sendEmbed({
-      color: 6546816,
-      author: {
-        name: mem.displayName + "#" + mem.user.discriminator,
-        icon_url: user.user.avatarURL
-      },
-      title: `${mem.id.toString()} | User Banned`,
-      description: `User: ${mem.user} was banned`,
-      timestamp: new Date()
-    });
-  }catch(e){
-    console.log(e);
-  }
+    color: 6546816,
+    author: {
+      name: mem.displayName + "#" + mem.user.discriminator,
+      icon_url: user.user.avatarURL
+    },
+    title: `${mem.id.toString()} | User Banned`,
+    description: `User: ${mem.user} was banned`,
+    timestamp: new Date()
+  });
 }
 
 exports.memberUpdated = (newMem, oldMem) => {
-
+  return;
 }

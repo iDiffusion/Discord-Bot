@@ -9,7 +9,7 @@ const bot = new Discord.Client(); //create an instance of a Discord Client, and 
 const auth = require("./auth.json"); // import the authorzation file
 const config = require("./config/config.json"); // import the config file
 
-const utils = require("./modules/utiliy.js");
+const utils = require("./modules/utility.js");
 const fun = require("./modules/fun.js");
 const basic = require("./modules/basic.js");
 const setup = require("./modules/config.js");
@@ -32,10 +32,10 @@ bot.on('ready', () => { //Display ready when bot is active
     let randNumber = Math.floor(Math.random() * auth.messages.length);
     bot.user.setGame(auth.messages[randNumber]);
   }
-);
+});
 
 bot.on("message", msg => { //Scan messages in text channels
-  var config.PREFIX = auth.prefix;
+  var PREFIX = auth.prefix;
   if(msg.channel.type != 'text') return; //If messages is in text channel continue
   else if(msg.content.startsWith(PREFIX + " ")) return; //If starts with prefix then space return
   else if(!msg.content.startsWith(PREFIX)) return; //If has prefix continue
@@ -96,7 +96,7 @@ bot.on("message", msg => { //Scan messages in text channels
     //any chat
     case 'invite':
     case 'inv':
-    utils.invite(PREFIX, msg);
+    utils.invite(PREFIX, msg, bot, config, auth);
     break;
 
     //text chat
@@ -118,7 +118,7 @@ bot.on("message", msg => { //Scan messages in text channels
 
     //any chat
     case 'ping':
-    utils.ping(PREFIX, msg);
+    utils.ping(PREFIX, msg, bot);
     break;
 
     //text chat (my guilds only)
@@ -128,12 +128,12 @@ bot.on("message", msg => { //Scan messages in text channels
 
     //text chat
     case 'prune':
-    manage.prune(PREIFX, msg);
+    manage.prune(PREIFX, msg, bot);
     break;
 
     //text chat
     case 'purge':
-    utils.purge(PREFIX, msg);
+    utils.purge(PREFIX, msg, bot);
     break;
 
     //text chat
@@ -176,7 +176,7 @@ bot.on("message", msg => { //Scan messages in text channels
 
     //any chat
     case 'suggestion':
-    utils.makeSuggestion(PREFIX, msg);
+    utils.makeSuggestion(PREFIX, msg, bot);
     break;
 
     //text chat
@@ -197,75 +197,69 @@ bot.on("message", msg => {
   if(msg.channel.type != 'dm') return; //If messages is in text channel continue
   else if(msg.author.bot) return; //If not a bot continue
 
-  var cmd = msg.content.substr(1).split(" ")[0];
-  var once = 0;
+  var command = [];
+  command.push(msg.content.substr(1).split(/ +/g)[0]);
+  command.push(msg.content.split(/ +/g)[0]);
 
-  [lbl] checkMsg:
-  switch(cmd){
-    //dm chat
-    case 'clean':
-    utils.cleanMessages(PREFIX, msg);
-    goto checkDone;
+  command.map(cmd => {
+    switch(cmd){
+      //dm chat
+      case 'clean':
+      utils.cleanMessages(PREFIX, msg, bot);
+      break;
 
-    //any chat
-    case 'commands':
-    case 'cmds':
-    utils.commands(PREFIX, msg);
-    goto checkDone;
+      //any chat
+      case 'commands':
+      case 'cmds':
+      utils.commands(PREFIX, msg);
+      break;
 
-    //dm chat
-    case 'eval':
-    case 'e':
-    setup.evalcmd(PREFIX);
-    goTo checkDone;
+      //dm chat
+      case 'eval':
+      case 'e':
+      setup.evalcmd(PREFIX, msg, bot);
+      break;
 
-    //any chat
-    case 'help':
-    case 'h':
-    utils.help(PREFIX, msg);
-    goto checkDone;
+      //any chat
+      case 'help':
+      case 'h':
+      utils.help(PREFIX, msg);
+      break;
 
-    //any chat
-    case 'info':
-    case 'i':
-    case '411':
-    utils.information(PREFIX, msg);
-    goto checkDone;
+      //any chat
+      case 'info':
+      case 'i':
+      case '411':
+      utils.information(PREFIX, msg, bot);
+      break;
 
-    //any chat
-    case 'invite':
-    case 'inv':
-    utils.invite(PREFIX, msg);
-    goto checkDone;
+      //any chat
+      case 'invite':
+      case 'inv':
+      utils.invite(PREFIX, msg, bot, config, auth);
+      break;
 
-    //any chat
-    case 'ping':
-    utils.ping(PREFIX, msg);
-    goto checkDone;
+      //any chat
+      case 'ping':
+      utils.ping(PREFIX, msg, bot);
+      break;
 
-    //any chat
-    case 'set':
-    setup.setBot(PREFIX, msg);
-    goto checkDone;
+      //any chat
+      case 'set':
+      setup.setBot(PREFIX, msg);
+      break;
 
-    //any chat
-    case 'status':
-    setup.statusBot(PREFIX, msg);
-    goto checkDone;
+      //any chat
+      case 'status':
+      setup.statusBot(PREFIX, msg);
+      break;
 
-    //any chat
-    case 'suggestion':
-    utils.makeSuggestion(PREFIX, msg);
-    goto checkDone;
-
-    default:
-    if(!once){
-      once++;
-      cmd = msg.content.split(" ")[0];
-      goto checkMsg;
+      //any chat
+      case 'suggestion':
+      utils.makeSuggestion(PREFIX, msg, bot, config);
+      break;
     }
-  }
-  [lbl] checkDone:
+  });
 });
 
 bot.on("guildMemberAdd", mem => { //Member joins guils
