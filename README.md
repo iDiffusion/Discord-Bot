@@ -2,7 +2,7 @@
 A discord bot with permissions, modules, access control, and many more features.
 
 ## Setup
-This bot requires a folder that isn't present, `node_modules`. The `node_modules` can be obtained after downloading [nodejs](https://nodejs.org/en/) and then running the following command `npm install --save discord.js` in a command line of your choice. The `auth.json` file also needs to be modified before running this bot.
+This bot requires a folder that isn't present, `node_modules`. The `node_modules` can be obtained after downloading [nodejs](https://nodejs.org/en/) and then running the following command `npm install --save discord.js` in a command line of your choice. The `auth.json` file also needs to be modified before running this bot, the token needs to be set.
 
 ## Installation instructions
 In a command line of your choice, enter the following commands
