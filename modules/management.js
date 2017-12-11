@@ -145,7 +145,7 @@ exports.kickMembers = (PREFIX, msg, bot, usersRemoved) => {
       msg.guild.member(userToKick).kick(kickMsg);
       usersRemoved.push(userToKick);
       if(!sendToModlog(msg, "kicked", 16733186, userToKick, kickMsg)) {
-        msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.")
+        msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.");
       }
     }
     else {
