@@ -30,7 +30,7 @@ bot.on('ready', () => { //Display ready when bot is active
     bot.user.setGame('with code');
   } else {
     let randNumber = Math.floor(Math.random() * auth.messages.length);
-    bot.user.setGame(auth.messages[randNumber]);
+    bot.user.setGame(auth.messages[randNumber]).replace('#users', bot.users.array().length);
   }
 });
 
