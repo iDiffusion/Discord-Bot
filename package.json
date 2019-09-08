@@ -4,7 +4,7 @@
   "description": "Discord Bot for personal server of Diffusion#4795",
   "main": "bot.js",
   "dependencies": {
-    "discord.js": "^11.2.1",
+    "discord.js": "^11.5.1",
     "discord.js-music": "^1.0.3",
     "sqlite": "^2.3.0",
     "underscore": "^1.8.3"

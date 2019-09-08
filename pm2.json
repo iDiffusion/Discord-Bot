@@ -1,11 +1,10 @@
 {
   "apps": [
     {
-      "name": "celestial",
-      "script": "bot.js",
+      "name": "Celestial",
+      "script": "./bot.js",
+      "watch": true,
       "args": "--color",
-      "out_file": "/dev/null",
-      "error_file": "/dev/null"
     }
   ]
 }
