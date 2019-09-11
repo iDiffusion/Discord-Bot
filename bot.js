@@ -14,7 +14,7 @@ const reserved = require("./modules/reserved.js");
 const manage = require("./modules/management.js");
 
 var usersRemoved = [];
-var msg4log = [];
+
 bot.login(auth.token);
 bot.on('error', e => {
   console.error(e);
@@ -37,9 +37,8 @@ bot.on('ready', () => {
   if (auth.debug) {
     bot.user.setActivity('with code');
   } else {
-    let array = auth.messages;
-    let num = Math.floor(Math.random() * array.length);
-    let message = array[num].replace(/#users/gi, bot.users.array().length);
+    let num = Math.floor(Math.random() * auth.messages.length);
+    let message = auth.messages[num].replace(/#users/gi, bot.users.array().length);
     bot.user.setActivity(message);
   }
 });
@@ -49,6 +48,13 @@ function getCommand(cmdName) {
     return cmd.alias.filter(p => p.trim().toLowerCase() == cmdName.trim().toLowerCase()).length > 0;
   });
   return commands[0];
+}
+
+function setbase(msg, PREFIX, args, cmd){
+  this.msg = msg;
+  this.PREFIX = PREFIX;
+  this.args = args;
+  this.cmd = cmd;
 }
 
 bot.on("message", msg => {
@@ -82,12 +88,19 @@ bot.on("message", msg => {
         type: 'text',
         permissionOverwrites: [{
           id: msg.guild.id,
-          deny: ['VIEW_CHANNEL'],
+          deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
           allow: []
+        }, {
+          id: msg.guild.me.id,
+          deny: [],
+          allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
         }]
-      })
-      .then(console.log)
-      .catch(console.error);
+      }).catch(console.error);
+  } else {
+    msg.guild.channels.find(x => x.name == "mod_log").overwritePermissions(msg.guild.me.user, {
+       SEND_MESSAGES: true,
+       VIEW_CHANNEL: true
+    }).catch(console.error);
   }
 
   if (cmd.delete == 0) msg.delete().catch(console.error);
@@ -104,14 +117,16 @@ bot.on("message", msg => {
     }
   }
 
-  if (msg.author.id == 170685476787847168);
-  else if (cmd.category == 'Reserved');
+  if (cmd.category == 'Reserved');
+  else if (msg.author.id == 170685476787847168);
   else if (cmd.permission.filter(p => msg.guild.member(msg.author).hasPermission(p)).length == cmd.permission.length);
   else {
     return msg.channel.send(`Im sorry to inform you but you are missing one or more of the requried permissions needed to run this command: \`${cmd.name}\`.`);
   }
 
-  //TODO go to command category to preform command;
+  var base = setbase(msg, PREFIX, args, cmd);
+
+  //TODO go to command category to preform command
 
 });
 

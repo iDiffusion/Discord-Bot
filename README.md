@@ -9,7 +9,7 @@ In a command line of your choice, enter the following commands
 - `git clone https://github.com/iDiffusion/Discord-Bot/` to download the project
 - `cd Discord-Bot` to open the new project directory made by GitHub
 - `npm install --save discord.js` to install its dependencies
-- `node bot.js` to start the bot
+- `node bot.js` to start the bot <br />
 Make sure to edit the `auth.json` file before running the bot, it will not work unedited.
 
 ## Usage
