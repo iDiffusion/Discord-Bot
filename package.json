@@ -15,13 +15,12 @@
   },
   "keywords": [
     "node",
-    "heroku",
+    "nodejs",
     "discord",
     "youtube-dl",
     "bot",
-    "music",
     "diffusion"
   ],
-  "author": "Tylon, Eli, Randall",
-  "license": "ISC"
+  "author": "Diffusion",
+  "license": "GNU"
 }
