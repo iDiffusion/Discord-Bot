@@ -43,8 +43,8 @@
     "category": "Basic",
     "channel": ["text"],
     "cooldown": 1,
-    "format": "say [message]",
-    "example": ["say Hello world!"],
+    "format": "broadcast [message]",
+    "example": ["broadcast Hello world!"],
     "enable": true,
     "deleteTime": 0
   }, {
@@ -364,7 +364,7 @@
     "alias": ["schedule"],
     "description": "This command will allow users to view the schedule for the streamers who play in this server.",
     "permission": [],
-    "category": "Reserved",
+    "category": "Requested",
     "channel": ["text"],
     "cooldown": 1,
     "format": "schedule",
@@ -455,7 +455,7 @@
     "example": ["warn @pyro Please stop spamming"],
     "enable": true,
     "deleteTime": 0
-  },{
+  }, {
     "name": "whitelist",
     "alias": ["whitelist", "wl"],
     "description": "This command keep a specified user from being limited by the bot or users.",
