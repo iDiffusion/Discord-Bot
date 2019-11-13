@@ -244,7 +244,7 @@
     "alias": ["prisolis"],
     "description": "This command creates a channel used for “Storytime with Mr.Z”, aka Zeadron, as he develops his new book.",
     "permission": ["MANAGE_CHANNELS"],
-    "category": "Reserved",
+    "category": "Requested",
     "channel": ["text"],
     "cooldown": 1,
     "format": "prisolis",
