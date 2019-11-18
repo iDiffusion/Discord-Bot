@@ -39,15 +39,15 @@
   "alias": ["broadcast"],
   "description": "This command will say the message from the bot account to all servers its a part of.",
   "permission": ["BOT_DESIGNER", "MENTION_EVERYONE", "SEND_TTS_MESSAGES", "EMBED_LINKS"],
-  "category": "General",
+  "category": "Reserved",
   "channel": ["text"],
   "cooldown": 1,
   "format": "broadcast [message]",
   "example": ["broadcast Hello world!"],
-  "enable": false,
+  "enable": true,
   "deleteTime": 0
 }, {
-  "name": "choose",
+  "name": "choices",
   "alias": ["choose", "choice", "choices"],
   "description": "This command will allow the bot to choose between choices provided to her.",
   "permission": [],
@@ -87,7 +87,7 @@
   "alias": ["donate"],
   "description": "This command will send a link to members who wish to donate to the server.",
   "permission": [],
-  "category": "Reserved",
+  "category": "General",
   "channel": ["text", "dm"],
   "cooldown": 1,
   "format": "donate",
@@ -128,7 +128,7 @@
   "cooldown": 1,
   "format": "giveaway [msg id]",
   "example": ["giveaway 123456789"],
-  "enable": false,
+  "enable": true,
   "deleteTime": -1
 }, {
   "name": "help",
@@ -183,7 +183,7 @@
   "alias": ["letsplay", "lp"],
   "description": "This command will allow members to communitcate with others in a easy way that they would like to play a game.",
   "permission": ["MENTION_EVERYONE"],
-  "category": "Reserved",
+  "category": "General",
   "channel": ["text"],
   "cooldown": 1,
   "format": "letsplay [game]",
@@ -267,7 +267,7 @@
   "alias": ["purge"],
   "description": "This command removes a specified number of messages from the channel. Flags or filters can be added to further specify the messages, such filters would remove messages of a specific content or from a specific author.",
   "permission": ["MANAGE_MESSAGES"],
-  "category": "Reserved",
+  "category": "Moderation",
   "channel": ["text"],
   "cooldown": 1,
   "format": "purge [number] [filter]",
@@ -392,7 +392,7 @@
   "cooldown": 1,
   "format": "status",
   "example": ["status"],
-  "enable": true,
+  "enable": false,
   "deleteTime": 0
 }, {
   "name": "tabletop",
@@ -416,7 +416,7 @@
   "cooldown": 1,
   "format": "test",
   "example": ["test"],
-  "enable": true,
+  "enable": false,
   "deleteTime": 0
 }, {
   "name": "top",
