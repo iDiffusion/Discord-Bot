@@ -13,17 +13,6 @@ exports.getCommand = (cmds, cmdName) => {
   return commands[0];
 }
 
-exports.setbase = (auth, config, bot, debug, prefix, msg, args, cmd) => {
-  this.PREFIX = prefix;
-  this.msg = msg;
-  this.args = args;
-  this.cmd = cmd;
-  this.debug = debug;
-  this.bot = bot;
-  this.auth = auth;
-  this.config = config;
-}
-
 exports.clean = (text) => {
   if (typeof(text) === "string") {
     return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));

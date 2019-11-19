@@ -1,3 +1,15 @@
+module.exports = function (base) {
+  if(base.cmd.name == "blacklist") blacklist(base);
+  else if(base.cmd.name == "broadcast") broadcase(base);
+  else if(base.cmd.name == "ping") ping(base);
+  else if(base.cmd.name == "restart") restart(base);
+  else if(base.cmd.name == "set") set(base);
+  else if(base.cmd.name == "shutdown") return shutdown(base);
+  else if(base.cmd.name == "status") return status(base);
+  else if(base.cmd.name == "whitelist") return whitelist(base);
+}
+
+
 exports.blacklist = (base) => {
   try {
     let user = base.msg.mentions.users.first();
@@ -31,10 +43,6 @@ exports.broadcast = (base) => {
   });
 };
 
-exports.get = (base) => {
-
-};
-
 exports.ping = (base) => {
   msg.channel.sendMessage(`pong!\`${Math.floor(base.bot.ping)}ms\``);
 };
@@ -55,10 +63,6 @@ exports.shutdown = (base) => {
 };
 
 exports.status = (base) => {
-
-};
-
-exports.test = (base) => {
 
 };
 

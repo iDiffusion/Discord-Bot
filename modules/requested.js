@@ -1,4 +1,8 @@
-exports.prisolis = (base) => {
+module.exports = function (base) {
+  if (base.cmd.name == "prisolis") prisolis(base);
+}
+
+function prisolis(base) {
   let channelName = "Story Time w/ Mr.Z";
   if (base.msg.guild.id != 212624757818916864) {
     return;

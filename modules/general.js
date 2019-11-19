@@ -1,8 +1,21 @@
-exports.apply = (base) => {
+module.exports = function (base) {
+  if(base.cmd.name == "apply") return apply(base);
+  else if(base.cmd.name == "clean") return clean(base);
+  else if(base.cmd.name == "donate") return donate(base);
+  else if(base.cmd.name == "giveaway") return giveaway(base);
+  else if(base.cmd.name == "help") return help(base);
+  else if(base.cmd.name == "info") return info(base);
+  else if(base.cmd.name == "invite") return invite(base);
+  else if(base.cmd.name == "letsplay") return letsplay(base);
+  else if(base.cmd.name == "say") return say(base);
+  else if(base.cmd.name == "tabletop") return tabletop(base);
+}
+
+function apply (base) {
   let reasonFor = base.args.slice(2).join(" ");
   if (base.args.length <= 2) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
-  } else if (base.msg.guild.roles.find(r => r.name == args[1].toLowerCase()).length != 0) {
+  } else if (!base.msg.guild.roles.find(r => r.name.toLowerCase() == base.args[1].toLowerCase().replace(/@/g, ""))) {
     return `Im sorry to inform you but you must have at least one role in order to run this command: \`${base.cmd.name}\`.`;
   }
   base.msg.guild.channels.find(c => c.name == "mod_log").send({
@@ -23,18 +36,18 @@ exports.apply = (base) => {
   }).catch(console.error);
 };
 
-exports.clean = (base) => {
+function clean (base) {
   base.msg.channel.fetchMessages().then(msgs => {
     let msg_array = message.array().filter(message => message.author.id == bot.id);
     msg_array.map(m => m.delete().catch(console.error));
   });
 };
 
-exports.donate = (base) => {
+function donate (base) {
   return base.auth.donate_link ? base.auth.donate_link : "https://www.paypal.me/ikaikalee";
 }
 
-exports.giveaway = (base) => {
+function giveaway (base) {
   //TODO change to message.createReactionCollector(filter, [option]);
   let message = base.msg.channel.fetchMessage(args[0]).catch(console.error);
   if (!message) {
@@ -54,7 +67,7 @@ exports.giveaway = (base) => {
   return `${users.find(u => u.id == array.random())} you have won!`;
 };
 
-exports.help = (base) => {
+function help (base) {
   try {
     let cmd = base.cmds.find(c => c.name == args[1].toLowerCase());
     msg.send({
@@ -85,7 +98,7 @@ exports.help = (base) => {
   }
 };
 
-exports.info = (base) => {
+function info (base) {
   if (base.args.length == 1) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
   } else if (base.args[1].toString().toLowerCase() == 'server') {
@@ -130,7 +143,7 @@ exports.info = (base) => {
   }
 }
 
-exports.invite = (base) => {
+function invite (base) {
   let config = base.config.find(g => g.id == base.msg.guild.id);
   if (base.args.length != 1) {
     if (base.args[1].toLowerCase().startsWith("perm")) {
@@ -153,7 +166,7 @@ exports.invite = (base) => {
   return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
 }
 
-exports.letsplay = (PREFIX, msg) => {
+function letsplay (PREFIX, msg) {
   if (base.msg.member.roles.array().length == 1) {
     return `Im sorry to inform you but you must have at least one role in order to run this command: \`${base.cmd.name}\`.`;
   } else if (base.args.length != 1) {
@@ -163,7 +176,7 @@ exports.letsplay = (PREFIX, msg) => {
   }
 }
 
-exports.say = (base) => {
+function say (base) {
   if (base.args.length == 1) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
   } else {
@@ -171,7 +184,7 @@ exports.say = (base) => {
   }
 }
 
-exports.tabletop = (base) => {
+function tabletop (base) {
   let channelName = base.cmd.name;
   let table = base.msg.guild.channels.find(c => c.name == channelName);
   if (!table) {

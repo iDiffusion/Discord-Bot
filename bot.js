@@ -3,12 +3,12 @@
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-const cmds = require("./commands.json");
 const auth = require("./config/auth.json");
 const config = require("./config/config.json");
+const cmds = require("./commands.json");
 
-const general = require("./modules/general.js");
 const fun = require("./modules/fun.js");
+const general = require("./modules/general.js");
 const manage = require("./modules/management.js");
 const reserved = require("./modules/reserved.js");
 const requested = require("./modules/requested.js");
@@ -42,10 +42,21 @@ bot.on('ready', () => {
     let num = Math.floor(Math.random() * auth.messages.length);
     let message = auth.messages[num]
       .replace(/#users/gi, bot.users.array().length)
-      .replace(/#servers/gi, bot.servers.array().length);
+      .replace(/#servers/gi, bot.guilds.array().length);
     bot.user.setActivity(message);
   }
 });
+
+function setbase (prefix, msg, args, cmd) {
+  this.PREFIX = prefix;
+  this.msg = msg;
+  this.args = args;
+  this.cmd = cmd;
+  this.debug = debug;
+  this.bot = bot;
+  this.auth = auth;
+  this.config = config;
+}
 
 bot.on("message", msg => {
   // verify command is send in a server;
@@ -74,9 +85,7 @@ bot.on("message", msg => {
         if (typeof evaled !== "string") {
           evaled = require("util").inspect(evaled);
         }
-        return message.channel.send(utils.clean(evaled), {
-          code: "xl"
-        });
+        return message.channel.send(utils.clean(evaled), {code: "xl"});
       } catch (err) {
         return msg.channel.send(`\`ERROR\` \`\`\`xl\n${utils.clean(err)}\n\`\`\``);
       }
@@ -147,15 +156,16 @@ bot.on("message", msg => {
     return utils.sendEmbed(msg, `Im sorry to inform you but you are missing one or more of the requried permissions needed to run this command: \`${cmd.name}\`.`);
   }
 
-  let base = utils.setbase(auth, config, bot, debug, PREFIX, msg, args, cmd);
+  let base = new setbase (PREFIX, msg, args, cmd);
+  let message;
 
-  //TODO go to command category to preform command
-  if (cmd.category == "Reserved") reserved(base);
-  else if (cmd.category == "General") general(base);
-  else if (cmd.category == "Fun") fun(base);
-  else if (cmd.category == "Moderation") manage(base);
-  else if (cmd.category == "Requested") requested(base);
-  
+  if (cmd.category == "General") message = general(base);
+  else if (cmd.category == "Fun") message = fun(base);
+  else if (cmd.category == "Moderation") message = manage(base);
+  else if (cmd.category == "Requested") message = requested(base);
+  else if (cmd.category == "Reserved") message = reserved(base);
+
+  if(message && message.trim()) utils.sendEmbed(msg, message);
 });
 
 // bot.on("guildMemberAdd", mem => {
