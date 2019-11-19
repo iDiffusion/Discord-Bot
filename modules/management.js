@@ -77,6 +77,8 @@ function badUserToModlog(msg, func){
 	}
 }
 
+
+
 exports.banMembers = (PREFIX, msg, bot, usersRemoved) => {
   let args = msg.cleanContent.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
@@ -90,7 +92,7 @@ exports.banMembers = (PREFIX, msg, bot, usersRemoved) => {
   else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
     msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
-  else if(!msg.member.hasPermission("BAN_MEMBERS")) { //limit to members that can ban in that quild
+  else if(!msg.member.hasPermission("BAN_MEMBERS")) { //limit to members that can ban in that guild
     badUserToModlog(msg, "ban");
     msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}ban\``);
   }
@@ -116,6 +118,78 @@ exports.banMembers = (PREFIX, msg, bot, usersRemoved) => {
   return usersRemoved;
 }
 
+exports.react = (PREFIX, msg, bot) => {
+  let args = msg.content.split(" ").slice(1)
+	if(!msg.guild.member(bot.user).hasPermission("MANAGE_ROLES")){ // check if bot has permission
+		msg.channel.sendMessage("Unable to complete request to manage members, I don't have the necessary permissions: `MANAGE_ROLES`\n An admin or server owner must change this before you are able to use this command.");
+	}
+  else if(!msg.member.hasPermission("MANAGE_ROLES")) { //limit to members that can give roles in that guild
+    badUserToModlog(msg, "react");
+    msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}react\``);
+  }
+  else if(args.length < 2) { //check for all fields
+    msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}react [message id] [role]\``);
+  }
+  else {
+    msg.delete().catch(console.error);
+    let channel = msg.channel;
+		let role = msg.mentions.roles.first();
+		try{
+			addRoleToUser(msg, bot, role, args);
+		}
+    catch (e) {
+			msg.channel.send(`You did not define an argument. Usage: \`${PREFIX}react [message id] [role]\``);
+      msg.channel.send(`Please make sure the proper message id is given and **@mention** a role to add. **${args[1]}** is not a mention.`);
+      deleteAfterTime(msg, 2000, 2);
+    }
+  }
+}
+
+async function addRoleToUser(msg, bot, role, args){
+	await  bot.channels.find("id",msg.channel.id).fetchMessages({around: args[0].trim(), limit: 1})
+	.then(async messages => {
+		let fetchedMsg = messages.first();
+		fetchedMsg.reactions.forEach(async (reaction) => {
+			let usersWhoReacted = await reaction.fetchUsers();
+			usersWhoReacted.forEach(async (user) => {
+				msg.guild.fetchMember(user).then(mem => {
+					mem.addRole(role);
+					console.log(mem.displayName);
+				}).catch();
+			});
+		});
+	});
+}
+
+exports.purge = (PREFIX, msg, bot) => {
+  let args = msg.content.trim().split(/ +/g).slice(1);
+  let mdLimit = 25;
+  if(msg.channel.tpye == "dm"){
+    return msg.channel.sendMessage("Unable to use this command in private chat.");
+  }
+  else if(!msg.guild.member(bot.user).hasPermission("MANAGE_MESSAGES")){
+    return msg.channel.sendMessage("Unable to complete request to prune messages, I don't have the necessary permissions: `MANAGE_MESSAGES`\n An admin or server owner must change this before you are able to use this command.");
+  }
+  else if(!msg.member.hasPermission("MANAGE_MESSAGES")){
+    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}purge\``);
+  }
+  else if(args.length === 0) {
+    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}prune [number]\``);
+  }
+  else if(isNaN(args[0])) {
+    return msg.channel.sendMessage(args[0] + " is not a number.");
+  }
+  else {
+    try{
+    let messagecount = parseInt(args[0]).catch(console.error); //fetch the number of messages to prune
+    deleteAfterTime(msg, 0, messagecount + 1);
+    msg.channel.sendMessage(`${messagecount} messages have been deleted.`).catch(console.error);
+    deleteAfterTime(msg, 2000, 1);
+  }
+    catch(err){}
+  }
+}
+
 exports.kickMembers = (PREFIX, msg, bot, usersRemoved) => {
   let args = msg.cleanContent.split(" ").slice(1);
   let modlog = msg.guild.channels.find("name", "mod_log");
@@ -129,7 +203,7 @@ exports.kickMembers = (PREFIX, msg, bot, usersRemoved) => {
   else if(cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
     msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
   }
-  else if(!msg.member.hasPermission("KICK_MEMBERS")) { //limit to memebrs that can kick in that quild
+  else if(!msg.member.hasPermission("KICK_MEMBERS")) { //limit to members that can kick in that guild
     badUserToModlog(msg, "kick");
     msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}kick\``);
   }
@@ -303,10 +377,10 @@ exports.prune = (PREFIX, msg, bot) => {
 	}
 }
 
-//-----------------------------------| Member Events |---------------------------------------\\
-exports.memberAdded = (mem, guild) => {//New member joined
+//-----------------------------------| Member Events |---------------------------------------
+exports.memberAdded = (mem, guild, config) => {//New member joined
   if(config.welcome_pm){
-    let msgToSend = config.welcome_pm.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user). replace(/$mention/gi, mem.user.username);
+    let msgToSend = config.welcome_pm.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user).replace(/$mention/gi, mem.user.username);
     msgToSend = msgToSend.split(" ").map(word => {
       if(word.startsWith("#")){
         let channel = mem.guild.channels.find("name", word.substr(1));
@@ -316,7 +390,7 @@ exports.memberAdded = (mem, guild) => {//New member joined
     mem.user.sendMessage(msgToSend);
   }
   if(config.welcome_msg) {
-    let msgToSend = config.welcome_msg.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user). replace(/$mention/gi, mem.user.username);
+    let msgToSend = config.welcome_msg.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user).replace(/$mention/gi, mem.user.username);
     mem.guild.channels.find("name", "general").sendMessage(msgToSend);
   }
   var modlog = mem.guild.channels.find("name","mod_log");
@@ -327,7 +401,7 @@ exports.memberAdded = (mem, guild) => {//New member joined
     color: 3276547,
     author: {
       name: mem.displayName + "#" + mem.user.discriminator,
-      icon_url: user.user.avatarURL
+      icon_url: mem.user.avatarURL
     },
     title: `${mem.user.toString()} | User Joined`,
     description: `User: ${mem.user} joined the server`,
@@ -337,7 +411,7 @@ exports.memberAdded = (mem, guild) => {//New member joined
 
 exports.memberRemoved = (mem, guild, usersRemoved) => { //Member leaves/kicked
   let length = usersRemoved.length;
-  usersRemoved = usersRemoved.filter(member => userRemoved.indexOf(mem) == -1);
+  usersRemoved = usersRemoved.filter(member => usersRemoved.indexOf(mem) == -1);
   if(usersRemoved.length != length) {
     return usersRemoved;
   }
@@ -355,7 +429,7 @@ exports.memberRemoved = (mem, guild, usersRemoved) => { //Member leaves/kicked
     description: `User: ${mem.user} left the server`,
     timestamp: new Date()
   });
-  return UsersRemoved;
+  return usersRemoved;
 }//End member mod_log
 
 exports.memberBanned = (mem, guild, usersRemoved) => { //Member Ban

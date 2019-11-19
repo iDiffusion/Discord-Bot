@@ -95,30 +95,6 @@
   "enable": true,
   "deleteTime": 0
 }, {
-  "name": "eval",
-  "alias": ["eval"],
-  "description": "No description",
-  "permission": ["BOT_DESIGNER"],
-  "category": "Reserved",
-  "channel": ["text", "dm"],
-  "cooldown": 1,
-  "format": "eval",
-  "example": ["eval"],
-  "enable": false,
-  "deleteTime": 0
-}, {
-  "name": "get",
-  "alias": ["get"],
-  "description": "Obtain and show a certain property of a user or channel",
-  "permission": ["BOT_DESIGNER"],
-  "category": "Reserved",
-  "channel": ["text", "dm"],
-  "cooldown": 0,
-  "format": "get [property] [item]",
-  "example": "get id @pyro",
-  "enable": true,
-  "deleteTime": -1
-}, {
   "name": "giveaway",
   "alias": ["giveaway", "winner"],
   "description": "This command will take the reactions off a message and pick a random user.",
@@ -192,14 +168,14 @@
   "deleteTime": 0
 }, {
   "name": "level",
-  "alias": ["level", "points", "point", "lvl"],
+  "alias": ["level", "lvl"],
   "description": "This command will allow users to find out what level a specified person is and the amount of points said person has earned.",
   "permission": [],
   "category": "Loyalty",
   "channel": ["text", "dm"],
   "cooldown": 1,
   "format": "level [user]",
-  "example": ["points @pyro"],
+  "example": ["level @pyro"],
   "enable": false,
   "deleteTime": -1
 }, {
@@ -237,6 +213,18 @@
   "format": "ping",
   "example": ["ping"],
   "enable": true,
+  "deleteTime": -1
+}, {
+  "name": "points",
+  "alias": ["points", "point"],
+  "description": "This command will allow users to find out how many points a specified person has.",
+  "permission": [],
+  "category": "Loyalty",
+  "channel": ["text", "dm"],
+  "cooldown": 1,
+  "format": "points [user]",
+  "example": ["points @pyro"],
+  "enable": false,
   "deleteTime": -1
 }, {
   "name": "prisolis",
@@ -319,7 +307,7 @@
   "channel": ["text", "dm"],
   "cooldown": 1,
   "format": "roulette [number]",
-  "example": "roulette all",
+  "example": ["roulette all"],
   "enable": false,
   "deleteTime": -1
 }, {
@@ -405,18 +393,6 @@
   "format": "tabletop",
   "example": ["tabletop"],
   "enable": true,
-  "deleteTime": 0
-}, {
-  "name": "test",
-  "alias": ["test", "try"],
-  "description": "This command is used to test parts of the program.",
-  "permission": ["BOT_DESIGNER"],
-  "category": "Reserved",
-  "channel": ["text", "dm"],
-  "cooldown": 1,
-  "format": "test",
-  "example": ["test"],
-  "enable": false,
   "deleteTime": 0
 }, {
   "name": "top",

@@ -1,21 +1,25 @@
 exports.prisolis = (base) => {
   let channelName = "Story Time w/ Mr.Z";
-  if (base.msg.guild.id != 212624757818916864) { // limit to one guild
+  if (base.msg.guild.id != 212624757818916864) {
     return;
-  } else if (!checkBotPerm(base, base.cmd.permission, base.cmd.name)) { // check if bot has permission
+  } else if (!checkBotPerm(base, base.cmd.permission, base.cmd.name)) {
     return;
-  } else if (base.msg.author.id != 222883669377810434 && !checkUserPerm(base, base.cmd.permission, base.cmd.name)) { // check if user has permission
-    return;
-  } else if (!checkCmdChat(base)) { // check if in command channel
+  } else if (base.msg.author.id != 222883669377810434 && !checkUserPerm(base, base.cmd.permission, base.cmd.name)) {
     return;
   }
   let storyTime = base.msg.guild.channels.find(c => c.name == channelName);
   if (!storyTime) {
-    base.msg.guild.createChannel(channelName, "voice", [
-      {'id': base.msg.guild.id, 'type': 'role', 'deny': 838860816, 'allow': 3145729},
-      {'id': '222883669377810434', 'type': 'member', 'deny': 536870928, 'allow': 334495745}
-    ]);
-    sendMessage(base.msg.channel,`Voice channel named \`${channelName}\` has been created. Use \`?prisolis\` to delete the channel after use.`);
+    base.msg.guild.createChannel(channelName, {
+      type: 'voice',
+      permissionOverwrites: [{
+        'id': base.msg.guild.id,
+        'allow': ["CREATE_INSTANT_INVITE", "VIEW_CHANNEL", "CONNECT", "SPEAK"]
+      }, {
+        'id': 222883669377810434,
+        'allow': ["MANAGE_CHANNELS", "MOVE_MEMBERS", "PRIORITY_SPEAKER", "MUTE_MEMBERS", "USE_VAD", "MANAGE_ROLES"]
+      }]
+    });
+    return `Voice channel named \`${channelName}\` has been created. Use \`?prisolis\` to delete the channel after use.`;
   } else {
     let mem_array = storyTime.members.array();
     try {
@@ -25,6 +29,6 @@ exports.prisolis = (base) => {
       //TODO move to first voice channel
     }
     storyTime.delete().catch(console.error);
-    sendMessage(base.msg.channel, `Voice channel named \`${channelName}\` has been deleted.`);
+    return base.msg.channel, `Voice channel named \`${channelName}\` has been deleted.`;
   }
 };
