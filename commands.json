@@ -24,7 +24,7 @@
   "deleteTime": 0
 }, {
   "name": "blacklist",
-  "alias": ["blacklist", "bl"],
+  "alias": ["blacklist", "bl", "ignoreuser"],
   "description": "This command bans the specified user from using the bot commands and logging the reason.",
   "permission": ["BOT_DESIGNER"],
   "category": "Reserved",
@@ -36,7 +36,7 @@
   "deleteTime": 0
 }, {
   "name": "broadcast",
-  "alias": ["broadcast"],
+  "alias": ["broadcast", "announce"],
   "description": "This command will say the message from the bot account to all servers its a part of.",
   "permission": ["BOT_DESIGNER", "MENTION_EVERYONE", "SEND_TTS_MESSAGES", "EMBED_LINKS"],
   "category": "Reserved",
@@ -105,7 +105,7 @@
   "format": "giveaway [msg id]",
   "example": ["giveaway 123456789"],
   "enable": true,
-  "deleteTime": -1
+  "deleteTime": 0
 }, {
   "name": "help",
   "alias": ["help", "h", "commands", "cmds", "command", "cmd"],
@@ -141,7 +141,8 @@
   "format": "invite [perm|temp|bot]",
   "example": ["invite perm", "info temp", "invite bot"],
   "enable": true,
-  "deleteTime": -1
+  "deleteTime": -1,
+  "override": true
 }, {
   "name": "kick",
   "alias": ["kick"],
@@ -164,8 +165,9 @@
   "cooldown": 1,
   "format": "letsplay [game]",
   "example": ["letsplay", "letsplay Black Ops 4"],
-  "enable": false,
-  "deleteTime": 0
+  "enable": true,
+  "deleteTime": 0,
+  "override": true
 }, {
   "name": "level",
   "alias": ["level", "lvl"],
@@ -237,7 +239,8 @@
   "format": "prisolis",
   "example": ["prisolis"],
   "enable": true,
-  "deleteTime": -1
+  "deleteTime": -1,
+  "override": true
 }, {
   "name": "prune",
   "alias": ["prune"],
@@ -261,7 +264,8 @@
   "format": "purge [number] [filter]",
   "example": ["purge 5", "purge 5 @pyro"],
   "enable": true,
-  "deleteTime": 0
+  "deleteTime": 0,
+  "override": true
 }, {
   "name": "restart",
   "alias": ["restart"],
@@ -272,7 +276,7 @@
   "cooldown": 1,
   "format": "restart",
   "example": ["restart"],
-  "enable": false,
+  "enable": true,
   "deleteTime": 0
 }, {
   "name": "reverse",
@@ -356,7 +360,7 @@
   "cooldown": 1,
   "format": "shutdown",
   "example": ["shutdown"],
-  "enable": false,
+  "enable": true,
   "deleteTime": 0
 }, {
   "name": "softban",
@@ -380,7 +384,7 @@
   "cooldown": 1,
   "format": "status",
   "example": ["status"],
-  "enable": false,
+  "enable": true,
   "deleteTime": 0
 }, {
   "name": "tabletop",

@@ -9,12 +9,14 @@ module.exports = function (base) {
 };
 
 function choices (base) {
-  let args = base.args.slice(1).join(" ").split(",");
+  let args = base.args.slice(1).join(" ").split(",").filter(s => s);
   if (args.length == 0) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+  } else if(args.length == 1){
+    return `I choose **${args[0].trim()}**.`;
+  } else {
+    return `I choose **${underscore.sample(args).trim()}**.`;
   }
-  let result = underscore.sample(args);
-  return `I choose **${result}**.`;
 };
 
 function coinflip (base) {
@@ -66,20 +68,20 @@ function reverse (base) {
 
 function rolldice (base) {
   let args = base.args.slice(1);
-  let numLimit = 10;
-  let sideLimit = 100;
+  const numLimit = 10;
+  const sideLimit = 100;
   try {
     if (args[0].indexOf('d') != -1) {
       args = args.join(" ").split('d');
     } else {
-      args.push("6");
+      args[1] = "6";
     }
     let valArray = [];
     args[0] = args[0] < numLimit ? args[0] : numLimit;
+    args[1] = args[1] < sideLimit ? args[1] : sideLimit;
     for (i = 1; i <= args[0]; i++) { //repeat for the number of die
-      args[1] = args[1] < sideLimit ? args[1] : sideLimit;
       let tempVal = Math.floor(Math.random() * args[1]) + 1;
-      if (tempVal == args[1] + 1) { //check for outofbounds case
+      if (tempVal > args[1]) { //check for outofbounds case
         tempVal = args[1];
       }
       valArray.push(tempVal);

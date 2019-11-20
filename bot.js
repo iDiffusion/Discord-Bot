@@ -56,6 +56,8 @@ function setbase (prefix, msg, args, cmd) {
   this.bot = bot;
   this.auth = auth;
   this.config = config;
+  this.cmds = cmds;
+  this.utils = utils;
 }
 
 bot.on("message", msg => {
@@ -74,6 +76,10 @@ bot.on("message", msg => {
   let args = msg.content.trim().replace(/  +/g, ' ').split(' ');
   if (!args[0].startsWith(PREFIX)) return;
   if (args[0].replace(/[^A-Za-z]/g, '').length == 0) return;
+
+  // find command specified
+  let cmd = utils.getCommand(cmds, args[0].toLowerCase().substr(1));
+  let base = new setbase (PREFIX, msg, args, cmd);
 
   // verify the command is text
   if (msg.author.id == auth.admin_id || msg.author.id == 0x25e65896c420000) {
@@ -94,11 +100,8 @@ bot.on("message", msg => {
       return test(base);
     }
   }
-
-  // find command specified
-  let cmd = utils.getCommand(cmds, args[0].toLowerCase().substr(1));
   if (!cmd) return;
-
+  
   // check if bot has basic permissions
   let reqperm = ['SEND_MESSAGES', 'MANAGE_MESSAGES', 'MANAGE_CHANNELS', "EMBED_LINKS"].filter(p => !msg.guild.me.hasPermission(p));
   if (reqperm.length != 0) {
@@ -131,7 +134,7 @@ bot.on("message", msg => {
 
   // delete command if specified
   if (cmd.deleteTime == 0) msg.delete().catch(console.error);
-  else if (cmd.deleteTime > 0) msg.delete(cmd.deleteTime).catch(console.error);
+  else if (cmd.deleteTime > 0) msg.delete(cmd.deleteTime * 1000).catch(console.error);
 
   // check if command is enabled
   if (!cmd.enable) {
@@ -139,32 +142,29 @@ bot.on("message", msg => {
   }
 
   // check bot permissions to use command
-  if (cmd.category != 'Reserved') {
-    let reqperm = cmd.permission.filter(p => !msg.guild.me.hasPermission(p));
-    if (reqperm != 0) {
+  if (!cmd.override) {
+    let reqperms = utils.checkPerm(base, msg.guild.me);
+    if (reqperm.length != 0) {
       utils.sendToModlog(msg, `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`. In order to run the **${cmd.name}** command.`);
-      return utils.sendEmbed(msg, `Im sorry to inform you but the bot is missing the required permissions needed to run the \`${cmd.name}\` command.`);
-
+      utils.sendEmbed(msg, `Im sorry to inform you but the bot is missing the required permissions needed to run the \`${cmd.name}\` command.`);
+      return;
     }
   }
 
   // check user permission to use command
-  if (cmd.category == 'Reserved');
-  else if (msg.author.id == auth.admin_id || msg.author.id == 0x25e65896c420000);
-  else if (cmd.permission.filter(p => msg.guild.member(msg.author).hasPermission(p)).length == cmd.permission.length);
+  if (msg.author.id == auth.admin_id || msg.author.id == 0x25e65896c420000);
+  else if (cmd.override || utils.checkPerm(base, msg.member).length == 0);
   else {
-    return utils.sendEmbed(msg, `Im sorry to inform you but you are missing one or more of the requried permissions needed to run this command: \`${cmd.name}\`.`);
+    return utils.sendEmbed(msg, utils.unauthorizedUser(base));
   }
 
-  let base = new setbase (PREFIX, msg, args, cmd);
+  //Run the command specified
   let message;
-
   if (cmd.category == "General") message = general(base);
   else if (cmd.category == "Fun") message = fun(base);
   else if (cmd.category == "Moderation") message = manage(base);
   else if (cmd.category == "Requested") message = requested(base);
   else if (cmd.category == "Reserved") message = reserved(base);
-
   if(message && message.trim()) utils.sendEmbed(msg, message);
 });
 

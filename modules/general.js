@@ -12,10 +12,13 @@ module.exports = function (base) {
 }
 
 function apply (base) {
-  let reasonFor = base.args.slice(2).join(" ");
-  if (base.args.length <= 2) {
+  let args = base.msg.cleanContent.trim().replace(/  +/g, ' ').split(' ');
+  let reasonFor = args.slice(2).join(" ");
+  if (args.length <= 2) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
-  } else if (!base.msg.guild.roles.find(r => r.name.toLowerCase() == base.args[1].toLowerCase().replace(/@/g, ""))) {
+  }
+  let role = base.msg.guild.roles.find(r => r.name.toLowerCase() == args[1].toLowerCase());
+  if (!role) {
     return `Im sorry to inform you but you must have at least one role in order to run this command: \`${base.cmd.name}\`.`;
   }
   base.msg.guild.channels.find(c => c.name == "mod_log").send({
@@ -26,7 +29,7 @@ function apply (base) {
         icon_url: base.msg.author.avatarURL
       },
       title: 'Role Application',
-      description: `${base.msg.author} has applied for the **${base.args[1]}** Role`,
+      description: `${base.msg.author} has applied for the **${role.name}** Role`,
       fields: [{
         name: 'Reason',
         value: reasonFor
@@ -69,32 +72,34 @@ function giveaway (base) {
 
 function help (base) {
   try {
-    let cmd = base.cmds.find(c => c.name == args[1].toLowerCase());
-    msg.send({
+    let cmd = base.utils.getCommand(base.cmds, base.args[1].toLowerCase());
+    base.msg.channel.send({
       embed: {
         color: 3447003,
         title: `Command: ${cmd.name}`,
-        description: `Alias: ${cmd.alias.join(", ")}` +
-          `Description: ${cmd.description}` +
-          `Category: ${cmd.category}\n` +
-          `Permission: ${cmd.permission.join(", ")}\n` +
-          `Format: ${cmd.format}\n` +
-          `Example: ${cmd.example}\n`,
+        description: `**Alias:** ${cmd.alias.join(", ")}\n` +
+          `**Description:** ${cmd.description}\n` +
+          `**Category:** ${cmd.category}\n` +
+          `**Permissions:** [${cmd.permission.join(", ")}]\n` +
+          `**Format:** ${cmd.format}\n` +
+          `**Examples:** [${cmd.example.join(`, `)}]`,
         thumbnail: {
-          url: guild.iconURL
+          url: base.msg.guild.iconURL
         },
         timestamp: new Date()
       }
     });
   } catch (e) {
-    let cmds = base.cmds.filter(c => {
-      if (!c.enable) return false;
-      let perms = c.permission.filter(p => base.msg.member.hasPermissions(p));
-      return p.length == c.permission.length;
-    });
     let array = [];
-    cmds.map(c => array.push(c.name));
-    return array.join(", ");
+    let cmds = base.cmds.map(cmd => {
+      if (!cmd.enable) return false;
+      let perms = cmd.permission.filter(p => {
+        if (base.msg.author.id == base.auth.admin_id || base.msg.author.id == 0x25e65896c420000) return true;
+        else return p != "BOT_DESIGNER" && base.msg.member.hasPermissions(p);
+      });
+     if(perms.length == cmd.permission.length) array.push(cmd.name);
+    });
+    return `The list of commands are:\n\`${array.join(", ")}\``;
   }
 };
 

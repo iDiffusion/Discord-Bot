@@ -1,16 +1,15 @@
-module.exports = function (base) {
-  if(base.cmd.name == "blacklist") blacklist(base);
-  else if(base.cmd.name == "broadcast") broadcase(base);
-  else if(base.cmd.name == "ping") ping(base);
-  else if(base.cmd.name == "restart") restart(base);
-  else if(base.cmd.name == "set") set(base);
-  else if(base.cmd.name == "shutdown") return shutdown(base);
-  else if(base.cmd.name == "status") return status(base);
-  else if(base.cmd.name == "whitelist") return whitelist(base);
+module.exports = function(base) {
+  if (base.cmd.name == "blacklist") blacklist(base);
+  else if (base.cmd.name == "broadcast") broadcast(base);
+  else if (base.cmd.name == "ping") ping(base);
+  else if (base.cmd.name == "restart") restart(base);
+  else if (base.cmd.name == "set") set(base);
+  else if (base.cmd.name == "shutdown") return shutdown(base);
+  else if (base.cmd.name == "status") return status(base);
+  else if (base.cmd.name == "whitelist") return whitelist(base);
 }
 
-
-exports.blacklist = (base) => {
+function blacklist(base) {
   try {
     let user = base.msg.mentions.users.first();
     let args = base.args.map(a => a.toLowerCase());
@@ -27,9 +26,12 @@ exports.blacklist = (base) => {
   }
 };
 
-exports.broadcast = (base) => {
-  base.bot.guilds.map(g => {
-    g.defaultChannel.send({
+function broadcast(base) {
+  base.bot.guilds.map(guild => {
+    let channel = guild.channels.find(x => x.name == "general");
+    channel = channel ? channel : guild.channels.find(x => x.name == "mod_log");
+    channel = channel ? channel : guild.channels[0];
+    channel.send({
       embed: {
         color: 3447003,
         description: base.args.slice(1).join(" "),
@@ -43,33 +45,43 @@ exports.broadcast = (base) => {
   });
 };
 
-exports.ping = (base) => {
-  msg.channel.sendMessage(`pong!\`${Math.floor(base.bot.ping)}ms\``);
+function ping(base) {
+  return `pong!\`${Math.ceil(base.bot.ping)}ms\``;
 };
 
-exports.restart = (base) => {
-  base.message.channel.send('Resetting...')
+function restart(base) {
+  msg.channel.send({
+      embed: {
+        color: 3447003,
+        description: 'Resetting...'
+      }
+    })
     .then(msg => base.bot.destroy())
     .then(() => base.bot.login(base.auth.token));
 };
 
-exports.set = (base) => {
+function set(base) {
 
 };
 
-exports.shutdown = (base) => {
-  base.message.channel.send('Shutting Down...')
+function shutdown(base) {
+  msg.channel.send({
+      embed: {
+        color: 3447003,
+        description: 'Shutting Down...'
+      }
+    })
     .then(msg => base.bot.destroy());
 };
 
-exports.status = (base) => {
+function status(base) {
 
 };
 
-exports.whitelist = (base) => {
+function whitelist(base) {
   try {
     let user = base.msg.mentions.users.first();
-    let args = base.args.map(a => a.toLowerCase());
+    let args = base.args;
     let remove = args.indexOf('-r') != -1;
     if (remove) {
       //TODO remove user from whitelist
