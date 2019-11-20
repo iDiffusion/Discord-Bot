@@ -1,3 +1,5 @@
+"use strict";
+
 exports.deleteAfterTime = (msg, timer, num) => {
   msg.channel.fetchMessages({limit: num}).then(msg => { // get the channel logs
     let msg_array = msg.array(); //create an array for messages

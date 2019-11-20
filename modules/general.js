@@ -1,23 +1,25 @@
-module.exports = function (base) {
-  if(base.cmd.name == "apply") return apply(base);
-  else if(base.cmd.name == "clean") return clean(base);
-  else if(base.cmd.name == "donate") return donate(base);
-  else if(base.cmd.name == "giveaway") return giveaway(base);
-  else if(base.cmd.name == "help") return help(base);
-  else if(base.cmd.name == "info") return info(base);
-  else if(base.cmd.name == "invite") return invite(base);
-  else if(base.cmd.name == "letsplay") return letsplay(base);
-  else if(base.cmd.name == "say") return say(base);
-  else if(base.cmd.name == "tabletop") return tabletop(base);
+"use strict";
+
+module.exports = function(base) {
+  if (base.cmd.name == "apply") return apply(base);
+  else if (base.cmd.name == "clean") return clean(base);
+  else if (base.cmd.name == "donate") return donate(base);
+  else if (base.cmd.name == "giveaway") return giveaway(base);
+  else if (base.cmd.name == "help") return help(base);
+  else if (base.cmd.name == "info") return info(base);
+  else if (base.cmd.name == "invite") return invite(base);
+  else if (base.cmd.name == "letsplay") return letsplay(base);
+  else if (base.cmd.name == "say") return say(base);
+  else if (base.cmd.name == "tabletop") return tabletop(base);
 }
 
-function apply (base) {
+function apply(base) {
   let args = base.msg.cleanContent.trim().replace(/  +/g, ' ').split(' ');
   let reasonFor = args.slice(2).join(" ");
   if (args.length <= 2) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
   }
-  let role = base.msg.guild.roles.find(r => r.name.toLowerCase() == args[1].toLowerCase());
+  let role = base.msg.guild.roles.find(r => args[1].toLowerCase().includes(r.name.toLowerCase()));
   if (!role) {
     return `Im sorry to inform you but you must have at least one role in order to run this command: \`${base.cmd.name}\`.`;
   }
@@ -39,38 +41,32 @@ function apply (base) {
   }).catch(console.error);
 };
 
-function clean (base) {
+function clean(base) {
   base.msg.channel.fetchMessages().then(msgs => {
-    let msg_array = message.array().filter(message => message.author.id == bot.id);
+    let msg_array = message.array().filter(message => message.author.id == base.bot.id);
     msg_array.map(m => m.delete().catch(console.error));
   });
 };
 
-function donate (base) {
-  return base.auth.donate_link ? base.auth.donate_link : "https://www.paypal.me/ikaikalee";
+function donate(base) {
+  let donate_link = base.auth.donate_link ? base.auth.donate_link : "https://www.paypal.me/ikaikalee";
+  return `If you would like to make any donations, please use the following link:\n${donate_link}`;
 }
 
-function giveaway (base) {
+function giveaway(base) {
   //TODO change to message.createReactionCollector(filter, [option]);
-  let message = base.msg.channel.fetchMessage(args[0]).catch(console.error);
-  if (!message) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
-  }
-  let users = [];
-  let array = [];
-  let reactions = message.reactions.array().map(r => r.users.array().map(u => {
-    users.push(u);
-    array.push(u.id);
-  }));
-  array = Array.from(new Set(array));
-  if (base.debug) {
-    console.log("This is the messsage: \n " + message.content);
-    console.log(users);
-  }
-  return `${users.find(u => u.id == array.random())} you have won!`;
+  let message = base.msg.channel.fetchMessage(base.args[1])
+    .then(msg => msg.reactions)
+    .then(reactions => {
+      reactions.array().map(react => {
+        //TODO get users from reaction
+      })
+    })
+    .catch(console.error);
+  return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
 };
 
-function help (base) {
+function help(base) {
   try {
     let cmd = base.utils.getCommand(base.cmds, base.args[1].toLowerCase());
     base.msg.channel.send({
@@ -91,51 +87,55 @@ function help (base) {
     });
   } catch (e) {
     let array = [];
-    let cmds = base.cmds.map(cmd => {
-      if (!cmd.enable) return false;
+    let cmds = base.cmds.filter(cmd => {
+      if (!cmd.enable) return;
       let perms = cmd.permission.filter(p => {
-        if (base.msg.author.id == base.auth.admin_id || base.msg.author.id == 0x25e65896c420000) return true;
-        else return p != "BOT_DESIGNER" && base.msg.member.hasPermissions(p);
+        if (base.msg.author.id == 0x25e65896c420000) return true;
+        else if (base.msg.author.id == base.auth.admin_id) return true;
+        else if (cmd.permission.includes("BOT_DESIGNER")) return false;
+        else return base.msg.member.hasPermissions(p);
       });
-     if(perms.length == cmd.permission.length) array.push(cmd.name);
+      if (perms.length == cmd.permission.length) array.push(cmd.name);
     });
     return `The list of commands are:\n\`${array.join(", ")}\``;
   }
 };
 
-function info (base) {
+function info(base) {
   if (base.args.length == 1) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
   } else if (base.args[1].toString().toLowerCase() == 'server') {
-    let guild = msg.channel.guild;
-    let botCount = guild.members.filter(mem => mem.user.bot).length;
-    if (isNaN(botCount)) botCount = 1;
-    msg.channel.sendEmbed({
-      color: 262088,
-      title: `Server info for ${guild.name}`,
-      description: `Guild Id: ${guild.id}\n` +
-        `Created: ${new Date(guild.createdAt).toUTCString()}\n` +
-        `Owner: ${guild.owner.displayName}\n` +
-        `Members: ${guild.members.size - botCount}\tBots: ${botCount}\n` +
-        `Icon URL: ${guild.iconURL}`,
-      thumbnail: {
-        url: guild.iconURL
-      },
-      timestamp: new Date()
+    let guild = base.msg.channel.guild;
+    let botCount = guild.members.filter(mem => mem.user.bot).array().length;
+    base.msg.channel.send({
+      embed: {
+        color: 262088,
+        title: `Server info for ${guild.name}`,
+        description: `**Guild Id:** ${guild.id}\n` +
+          `**Created:** ${new Date(guild.createdAt).toUTCString()}\n` +
+          `**Owner:** ${guild.owner.displayName}\n` +
+          `**Members:** ${guild.members.size - botCount} **Bots:** ${botCount}\n` +
+          `**Icon URL:** ${guild.iconURL}`,
+        thumbnail: {
+          url: guild.iconURL
+        },
+        timestamp: new Date()
+      }
     });
   } else {
     try {
-      let user = args[1].toString().toLowerCase() == 'bot' ? base.bot.user : base.msg.mentions.users.first();
+      let user = base.args[1].toString().toLowerCase() == 'bot' ? base.bot.user : base.msg.mentions.users.first();
+      console.log(user);
       base.msg.channel.send({
         embed: {
           color: 3447003,
           title: `User info for ${user.tag}`,
-          description: `Username: ${user.username}\tNickname: ${base.msg.guild.member(user).nickname}\n` +
-            `User ID: ${user.id}\n` +
-            `Discriminator: ${user.discriminator}\n` +
-            `Created: ${new Date(user.createdAt).toUTCString()}\n` +
-            `Joined: ${new Data(msg.guild.member(user).joinedTimestamp).toUTCString()}\n` +
-            `Avatar URL: ${user.avatarURL}`,
+          description: `**Username:** ${user.username} **Nickname:** ${base.msg.guild.member(user).displayName}\n` +
+            `**User ID:** ${user.id}\n` +
+            `**Discriminator:** ${user.discriminator}\n` +
+            `**Created:** ${new Date(user.createdAt).toUTCString()}\n` +
+            `**Joined:** ${new Date(base.msg.guild.member(user).joinedTimestamp).toUTCString()}\n` +
+            `**Avatar URL:** ${user.avatarURL}`,
           thumbnail: {
             url: user.avatarURL
           },
@@ -143,55 +143,70 @@ function info (base) {
         }
       });
     } catch (e) {
+      console.log(e);
       return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
     }
   }
 }
 
-function invite (base) {
+function invite(base) {
   let config = base.config.find(g => g.id == base.msg.guild.id);
-  if (base.args.length != 1) {
+  if (base.args.length > 1) {
     if (base.args[1].toLowerCase().startsWith("perm")) {
-      let link = config && config.server_link ? config.server_link : base.msg.channel.createInvite({
-        maxAge: 0
-      });
-      return `${link} is a permanent link for new members.`;
+      if (config && config.server_link) {
+        return `${config.server_link} is a permanent link for new members.`;
+      } else {
+        base.msg.channel.createInvite({
+          maxAge: 0
+        }).then(permlink => {
+          base.utils.sendEmbed(base.msg, `${permlink.url} is a permanent link for new members.`);
+        });
+      }
     } else if (base.args[1].toLowerCase().startsWith("temp")) {
-      let link = config && config.server_link ? config.server_link : base.msg.channel.createInvite({
-        temporary: true,
-        maxAge: 0
-      });
-      return `${link} is a temporary link for visiting members.`;
+      if (config && config.temp_link) {
+        return `${config.temp_link} is a temp link for visiting members.`;
+      } else {
+        base.msg.channel.createInvite({
+          temporary: true,
+          maxAge: 0
+        }).then(templink => {
+          base.utils.sendEmbed(base.msg, `${templink.url} is a temp link for visiting members.`);
+        });
+      }
     } else if (base.args[1].toLowerCase().startsWith("bot")) {
       let auth = base.auth;
       let link = auth && auth.bot_link ? auth.bot_link : "https://discordapp.com/api/oauth2/authorize?client_id=264995143789182976&permissions=8&scope=bot";
       return `${link} is a invite link for me.`;
+    } else {
+      return base.utils.noArgsFound(base);
     }
+  } else {
+    return base.utils.noArgsFound(base);
   }
-  return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
 }
 
-function letsplay (PREFIX, msg) {
+function letsplay(base) {
   if (base.msg.member.roles.array().length == 1) {
     return `Im sorry to inform you but you must have at least one role in order to run this command: \`${base.cmd.name}\`.`;
   } else if (base.args.length != 1) {
-    return base.msg.channel.send(`@here **${base.msg.author.username}** would like to play **${base.args.slice(1).join(" ")}**!`);
+    base.msg.channel.send(`@here **${base.msg.author.username}** would like to play **${base.args.slice(1).join(" ")}**!`);
+    return;
   } else {
-    return base.msg.channel.send(`@here **${base.msg.author.username}** would like to play a game!`);
+    base.msg.channel.send(`@here **${base.msg.author.username}** would like to play a game!`);
+    return;
   }
 }
 
-function say (base) {
+function say(base) {
   if (base.args.length == 1) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+    base.utils.noArgsFound(base);
   } else {
     base.msg.channel.send(base.args.slice(1).join(" "));
   }
 }
 
-function tabletop (base) {
-  let channelName = base.cmd.name;
-  let table = base.msg.guild.channels.find(c => c.name == channelName);
+function tabletop(base) {
+  let table = base.msg.guild.channels.find(c => c.name == "tabletop");
   if (!table) {
     base.msg.guild.createChannel("tabletop", {
       type: "text",

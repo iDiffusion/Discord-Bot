@@ -1,9 +1,11 @@
+"use strict";
+
 module.exports = function(base) {
-  if (base.cmd.name == "blacklist") blacklist(base);
-  else if (base.cmd.name == "broadcast") broadcast(base);
-  else if (base.cmd.name == "ping") ping(base);
-  else if (base.cmd.name == "restart") restart(base);
-  else if (base.cmd.name == "set") set(base);
+  if (base.cmd.name == "blacklist") return blacklist(base);
+  else if (base.cmd.name == "broadcast") return broadcast(base);
+  else if (base.cmd.name == "ping") return ping(base);
+  else if (base.cmd.name == "restart") return restart(base);
+  else if (base.cmd.name == "set") return set(base);
   else if (base.cmd.name == "shutdown") return shutdown(base);
   else if (base.cmd.name == "status") return status(base);
   else if (base.cmd.name == "whitelist") return whitelist(base);

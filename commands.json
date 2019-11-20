@@ -7,7 +7,7 @@
   "channel": ["text"],
   "cooldown": 1,
   "format": "apply [role] [reason]",
-  "example": ["apply Mod I can help to moderation"],
+  "example": ["apply Mod I can help to moderate the server"],
   "enable": true,
   "deleteTime": 0
 }, {
@@ -104,7 +104,7 @@
   "cooldown": 1,
   "format": "giveaway [msg id]",
   "example": ["giveaway 123456789"],
-  "enable": true,
+  "enable": false,
   "deleteTime": 0
 }, {
   "name": "help",
@@ -238,7 +238,7 @@
   "cooldown": 1,
   "format": "prisolis",
   "example": ["prisolis"],
-  "enable": true,
+  "enable": false,
   "deleteTime": -1,
   "override": true
 }, {
@@ -384,7 +384,7 @@
   "cooldown": 1,
   "format": "status",
   "example": ["status"],
-  "enable": true,
+  "enable": false,
   "deleteTime": 0
 }, {
   "name": "tabletop",

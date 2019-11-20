@@ -47,7 +47,7 @@ bot.on('ready', () => {
   }
 });
 
-function setbase (prefix, msg, args, cmd) {
+function setbase(prefix, msg, args, cmd) {
   this.PREFIX = prefix;
   this.msg = msg;
   this.args = args;
@@ -69,7 +69,7 @@ bot.on("message", msg => {
   if (msg.author.bot) return;
 
   // set command prefix
-  let server = config.channels.filter(g => msg.guild.id == g.guild_id)[0];
+  let server = config.filter(g => msg.guild.id == g.guild_id)[0];
   let PREFIX = server ? server.prefix : "?";
 
   // split message into arguments
@@ -79,7 +79,7 @@ bot.on("message", msg => {
 
   // find command specified
   let cmd = utils.getCommand(cmds, args[0].toLowerCase().substr(1));
-  let base = new setbase (PREFIX, msg, args, cmd);
+  let base = new setbase(PREFIX, msg, args, cmd);
 
   // verify the command is text
   if (msg.author.id == auth.admin_id || msg.author.id == 0x25e65896c420000) {
@@ -91,17 +91,22 @@ bot.on("message", msg => {
         if (typeof evaled !== "string") {
           evaled = require("util").inspect(evaled);
         }
-        return message.channel.send(utils.clean(evaled), {code: "xl"});
+        return message.channel.send(utils.clean(evaled), {
+          code: "xl"
+        });
       } catch (err) {
         return msg.channel.send(`\`ERROR\` \`\`\`xl\n${utils.clean(err)}\n\`\`\``);
       }
     } else if (args[0].slice(1).startsWith("test")) {
       msg.delete().catch(console.error);
-      return test(base);
+      let message = test(base);
+      if (message && message.trim()) utils.sendEmbed(msg, message);
+      return;
     }
   }
   if (!cmd) return;
-  
+  if (!cmd.channel.includes("text")) return;
+
   // check if bot has basic permissions
   let reqperm = ['SEND_MESSAGES', 'MANAGE_MESSAGES', 'MANAGE_CHANNELS', "EMBED_LINKS"].filter(p => !msg.guild.me.hasPermission(p));
   if (reqperm.length != 0) {
@@ -143,7 +148,7 @@ bot.on("message", msg => {
 
   // check bot permissions to use command
   if (!cmd.override) {
-    let reqperms = utils.checkPerm(base, msg.guild.me);
+    reqperm = utils.checkPerm(base, msg.guild.me);
     if (reqperm.length != 0) {
       utils.sendToModlog(msg, `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`. In order to run the **${cmd.name}** command.`);
       utils.sendEmbed(msg, `Im sorry to inform you but the bot is missing the required permissions needed to run the \`${cmd.name}\` command.`);
@@ -165,7 +170,7 @@ bot.on("message", msg => {
   else if (cmd.category == "Moderation") message = manage(base);
   else if (cmd.category == "Requested") message = requested(base);
   else if (cmd.category == "Reserved") message = reserved(base);
-  if(message && message.trim()) utils.sendEmbed(msg, message);
+  if (message && message.trim()) utils.sendEmbed(msg, message);
 });
 
 // bot.on("guildMemberAdd", mem => {

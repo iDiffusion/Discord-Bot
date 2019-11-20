@@ -1,28 +1,31 @@
-module.exports = function (base) {
-  if (base.cmd.name == "prisolis") prisolis(base);
+module.exports = function(base) {
+  if (base.cmd.name == "prisolis") return prisolis(base);
 }
 
 function prisolis(base) {
   let channelName = "Story Time w/ Mr.Z";
-  if (base.msg.guild.id != 212624757818916864) {
-    return;
-  } else if (!checkBotPerm(base, base.cmd.permission, base.cmd.name)) {
-    return;
-  } else if (base.msg.author.id != 222883669377810434 && !checkUserPerm(base, base.cmd.permission, base.cmd.name)) {
-    return;
+  // if (base.msg.guild.id != 212624757818916864) return;
+  if (base.utils.checkPerm(base, base.msg.guild.me).length != 0) {
+    return `Please give ${base.msg.guild.me.user} the following permissions: \`${base.cmd.permission}\`. In order to run the **${base.cmd.name}** command.`;
+  } else if (base.msg.author.id != 222883669377810434 && base.utils.checkPerm(base, base.msg.member).length != 0) {
+    return base.utils.unauthorizedUser(base);
   }
   let storyTime = base.msg.guild.channels.find(c => c.name == channelName);
   if (!storyTime) {
     base.msg.guild.createChannel(channelName, {
-      type: 'voice',
-      permissionOverwrites: [{
-        'id': base.msg.guild.id,
-        'allow': ["CREATE_INSTANT_INVITE", "VIEW_CHANNEL", "CONNECT", "SPEAK"]
-      }, {
-        'id': 222883669377810434,
-        'allow': ["MANAGE_CHANNELS", "MOVE_MEMBERS", "PRIORITY_SPEAKER", "MUTE_MEMBERS", "USE_VAD", "MANAGE_ROLES"]
-      }]
-    });
+        type: 'voice',
+        permissionOverwrites: [{
+          id: base.msg.guild.id,
+          deny: [],
+          allow: ["CREATE_INSTANT_INVITE", "VIEW_CHANNEL", "CONNECT", "SPEAK"]
+        },{
+          id: 222883669377810434,
+          deny: [],
+          allow: ["MANAGE_CHANNELS", "MOVE_MEMBERS", "PRIORITY_SPEAKER", "MUTE_MEMBERS", "USE_VAD", "MANAGE_ROLES"]
+        }]
+      })
+      .then(console.log)
+      .catch(console.error);
     return `Voice channel named \`${channelName}\` has been created. Use \`?prisolis\` to delete the channel after use.`;
   } else {
     let mem_array = storyTime.members.array();
@@ -33,6 +36,6 @@ function prisolis(base) {
       //TODO move to first voice channel
     }
     storyTime.delete().catch(console.error);
-    return base.msg.channel, `Voice channel named \`${channelName}\` has been deleted.`;
+    return `Voice channel named \`${channelName}\` has been deleted.`;
   }
 };
