@@ -52,7 +52,7 @@ function ping(base) {
 };
 
 function restart(base) {
-  msg.channel.send({
+  base.msg.channel.send({
       embed: {
         color: 3447003,
         description: 'Resetting...'
@@ -67,7 +67,7 @@ function set(base) {
 };
 
 function shutdown(base) {
-  msg.channel.send({
+  base.msg.channel.send({
       embed: {
         color: 3447003,
         description: 'Shutting Down...'
@@ -83,8 +83,7 @@ function status(base) {
 function whitelist(base) {
   try {
     let user = base.msg.mentions.users.first();
-    let args = base.args;
-    let remove = args.indexOf('-r') != -1;
+    let remove = base.args.indexOf('-r') != -1;
     if (remove) {
       //TODO remove user from whitelist
       return `User has been removed from the whitelist.`;

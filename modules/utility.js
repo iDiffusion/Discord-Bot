@@ -1,10 +1,12 @@
 "use strict";
 
 exports.deleteAfterTime = (msg, timer, num) => {
-  msg.channel.fetchMessages({limit: num}).then(msg => { // get the channel logs
+  msg.channel.fetchMessages({
+    limit: num
+  }).then(msg => { // get the channel logs
     let msg_array = msg.array(); //create an array for messages
     msg_array.length = num; //limit to the requested number + 1 for the command message
-    msg_array.map(m => m.delete(timer).catch(console.error)); //has to delete messages individually.
+    msg_array.map(m => m.delete(timer * 1000).catch(console.error)); //has to delete messages individually.
   });
 };
 
@@ -24,7 +26,7 @@ exports.clean = (text) => {
 };
 
 exports.sendToModlog = (msg, message) => {
-  msg.guild.channels.find(x => x.name == "mod_log")
+  return msg.guild.channels.find(x => x.name == "mod_log")
     .send({
       embed: {
         color: 3447003,
@@ -34,7 +36,7 @@ exports.sendToModlog = (msg, message) => {
 };
 
 exports.sendEmbed = (msg, message) => {
-  msg.channel.send({
+  return msg.channel.send({
     embed: {
       color: 3447003,
       description: message
@@ -42,8 +44,21 @@ exports.sendEmbed = (msg, message) => {
   }).catch(console.error);
 };
 
+exports.sendEmbed = (msg, message, color, timer) => {
+  return msg.channel.send({
+    embed: {
+      color: color,
+      description: message
+    }
+  }).then(msgs => {
+    if(timer > 1){
+      msgs.delete(timer*1000);
+    }
+  }).catch(console.error);
+};
+
 exports.sendToOwner = (msg, message) => {
-  msg.guild.owner.send({
+  return msg.guild.owner.send({
     embed: {
       color: 3447003,
       description: message

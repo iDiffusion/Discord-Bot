@@ -70,7 +70,7 @@ bot.on("message", msg => {
 
   // set command prefix
   let server = config.filter(g => msg.guild.id == g.guild_id)[0];
-  let PREFIX = server ? server.prefix : "?";
+  let PREFIX = server && server.prefix ? server.prefix : "?";
 
   // split message into arguments
   let args = msg.content.trim().replace(/  +/g, ' ').split(' ');
@@ -167,7 +167,7 @@ bot.on("message", msg => {
   let message;
   if (cmd.category == "General") message = general(base);
   else if (cmd.category == "Fun") message = fun(base);
-  else if (cmd.category == "Moderation") message = manage(base);
+  else if (cmd.category == "Moderation") message = manage(base, usersRemoved);
   else if (cmd.category == "Requested") message = requested(base);
   else if (cmd.category == "Reserved") message = reserved(base);
   if (message && message.trim()) utils.sendEmbed(msg, message);

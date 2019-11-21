@@ -261,7 +261,7 @@
   "category": "Moderation",
   "channel": ["text"],
   "cooldown": 1,
-  "format": "purge [number] [filter]",
+  "format": "purge [number] [filters]",
   "example": ["purge 5", "purge 5 @pyro"],
   "enable": true,
   "deleteTime": 0,
