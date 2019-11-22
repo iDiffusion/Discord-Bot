@@ -173,44 +173,44 @@ bot.on("message", msg => {
   if (message && message.trim()) utils.sendEmbed(msg, message);
 });
 
-// bot.on("guildMemberAdd", mem => {
-//   let guild = mem.guild;
-//   manage.memberAdded(mem, guild, config);
-// });
-//
-// bot.on("guildMemberRemove", mem => {
-//   let guild = mem.guild;
-//   manage.memberRemoved(mem, guild, usersRemoved);
-// });
-//
-// bot.on("guildBanAdd", (guild, mem) => {
-//   manage.memberBanned(mem, guild, usersRemoved);
-// });
-//
-// bot.on("guildBanRemove", (guild, mem) => {
-//   mamange.memberUnbanned(mem, guild, usersRemoved);
-// });
-//
-// bot.on("guildCreate", guild => {
-//   console.log(`New guild added: ${guild}.`);
-// });
-//
-// bot.on("guildDelete", guild => {
-//   console.log(`Old guild left/deleted: ${guild}.`);
-// });
-//
-// bot.on("guildMembersChunk", (mem, guild) => {
-//   mem.map(m => manage.memberAdded(m, guild, config));
-// });
-//
-// bot.on("guildMemberUpdate", (oldMem, newMem) => {
-//   manage.memberUpdated(oldMem, newMem);
-// });
-//
-// bot.on("guildUpdate", (oldGuild, newGuild) => {
-//   console.log(`${oldGuild.name} has changed the name to ${newGuild.name}.`);
-// });
-//
-// bot.on("userUpdate", (oldMem, newMem) => {
-//   manage.memberUpdated(oldMem, newMem);
-// });
+bot.on("guildMemberAdd", mem => {
+  let guild = mem.guild;
+  manage.memberAdded(mem, config, usersRemoved);
+});
+
+bot.on("guildMemberRemove", mem => {
+  let guild = mem.guild;
+  manage.memberRemoved(mem, config, usersRemoved);
+});
+
+bot.on("guildBanAdd", (guild, mem) => {
+  manage.memberBanned(mem, config, usersRemoved);
+});
+
+bot.on("guildBanRemove", (guild, mem) => {
+  mamange.memberUnbanned(mem, config, usersRemoved);
+});
+
+bot.on("guildCreate", guild => {
+  console.log(`New guild added: ${guild}.`);
+});
+
+bot.on("guildDelete", guild => {
+  console.log(`Old guild left/deleted: ${guild}.`);
+});
+
+bot.on("guildMembersChunk", (mem, guild) => {
+  mem.map(m => manage.memberAdded(m, config, usersRemoved));
+});
+
+bot.on("guildMemberUpdate", (oldMem, newMem) => {
+  manage.memberUpdated(oldMem, newMem);
+});
+
+bot.on("guildUpdate", (oldGuild, newGuild) => {
+  console.log(`${oldGuild.name} has changed the name to ${newGuild.name}.`);
+});
+
+bot.on("userUpdate", (oldMem, newMem) => {
+  manage.memberUpdated(oldMem, newMem);
+});

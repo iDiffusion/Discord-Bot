@@ -62,7 +62,8 @@ function sendToDM(msg, action, color, user, message) {
 
 function ban(base, usersRemoved) {
   if (base.args.length < 3) {
-    return base.utils.noArgsFound(base);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16721408, 3);
+    return;
   }
   try {
     let userToBan = base.msg.mentions.users.first();
@@ -72,13 +73,15 @@ function ban(base, usersRemoved) {
     sendToModlog(base.msg, "Banned", 16721408, userToBan, banMsg);
     usersRemoved.push(userToBan);
   } catch (e) {
-    return base.utils.noArgsFound(base);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16721408, 3);
+    return;
   }
 }
 
 function kick(base, usersRemoved) {
   if (base.args.length < 3) {
-    return base.utils.noArgsFound(base);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16733186, 3);
+    return;
   }
   try {
     let userToKick = base.msg.mentions.users.first();
@@ -88,72 +91,31 @@ function kick(base, usersRemoved) {
     sendToModlog(base.msg, "Kicked", 16733186, userToKick, kickMsg);
     usersRemoved.push(userToKick);
   } catch (e) {
-    return base.utils.noArgsFound(base);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16733186, 3);
+    return;
   }
 }
 
-function moveMembers(base) {
-  if (msg.channel.type == 'dm') { // Limit to guilds only
-    return msg.channel.sendMessage("Unable to use this command in private chat.");
-  } else if (!msg.guild.member(bot.user).hasPermssion("MOVE_MEMBERS")) { //check if bot has permission to move members
-    return msg.channel.sendMessage("Unable to complete request to move members, I don't have the necessary permissions `MOVE_MEMBERS`\n An admin or server owner must change this before you are able to user this command.`");
-  }
-  if (!msg.member.hasPermission("MOVE_MEMBERS")) { //limit to members taht have permission
-    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}move `);
-  } else if (args.length < 2 || isNaN(args[0]) || isNaN(args[1])) { //check for all fields
-    msg.channel.sendMessage(`You did not define enough arguments. Usage: \`${PREFIX}move [VC from ID] [VC to ID]`);
-    return deleteAfterTime(msg, 2000, 2);
-  }
-  let mem_array = msg.guild.channels.get(args[0]).members.array();
-  let fromChannel = msg.guild.channels.get(args[0]);
-  let toChannel = msg.guild.channels.get(args[1]);
-  if (mem_array.length == 0 && fromChannel) { //check that members are in from channel
-    msg.channel.sendMessage(`Currently there are no members in ${fromChannel.name}. Usage: \`${PREFIX}move [VC from ID] [VC to ID]\``);
-    return deleteAfterTime(msg, 2000, 2);
-  } else if (!fromChannel || fromChannel.type != "text") { //check that from channel exist
-    msg.channel.sendMessage("From channel ID doesnt match a text channel from this server. Please try again.");
-    return deleteAfterTime(msg, 2000, 2);
-  } else if (!toChannel || toChannel.type != "text") { //check taht to channel exist
-    msg.channel.sendMessage("To channel ID doesnt match a text channel from this server. Please try again.");
-    return delteAfterTime(msg, 2000, 2);
-  }
+function move(base) {
   try {
-    msg.delete().catch(console.error);
-    mem_array.map(id => msg.guild.member(id).setVoiceChannel(msg.guild.channels.get(args[1])));
+    let fromChannel = base.msg.guild.channels.get(base.args[1]);
+    let toChannel = base.msg.guild.channels.get(base.args[2]);
+    let mem_array = fromChannel.members.array();
+    mem_array.map(user => base.msg.guild.member(user).setVoiceChannel(toChannel));
   } catch (e) {
-    msg.channel.sendMessage("One of the provided channel ID's does not exist. Please make sure that the numbers provided are ID's");
-    deleteAfterTime(msg, 3000, 1);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 3447003, 3);
+    return;
   }
 }
 
 function prune(base, usersRemoved) {
-  let args = msg.content.split(" ").slice(1);
-  let modlog = msg.guild.channels.find("name", "mod_log");
-  let cmdchat = msg.guild.channels.find("name", cmdChannelName);
-  if (msg.channel.type == "dm") { //limit to guilds only
-    return msg.reply("Unable to use this command in private chat.");
-  } else if (!msg.guild.member(bot.user).hasPermssion("KICK_MEMBERS")) { //check if bot has permission to kick members
-    return msg.channel.sendMessage("Unable to complete request to move members, I don't have the necessary permissions `KICK_MEMBERS`\n An admin or server owner must change this before you are able to user this command.`");
-  } else if (cmdChat && msg.channel.name != cmdChannelName) { //limit to command chat
-    return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
-  } else if (!msg.member.hasPermission("KICK_MEMBERS")) { //limit to members that can kick memebrs
-    badUserToModlog(msg, "prune");
-    return msg.reply(`You pleb, you don't have permission to use this command \`${PREFIX}prune\`.`);
-  } else if (args.length != 1 || isNan(args[0])) { //check for all fields
-    msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}prune [days]\``);
-  }
-  try { //check if args[0] is a number
-    msg.guild.pruneMembers(arg[0], false, "Removed for inactivity").then(pruned => {
-      if (modlog) {
-        modlog.sendMessage(`I just pruned ${pruned} members!`);
-      } else {
-        msg.channel.sendMessage(`I just pruned ${pruned} members!`);
-      }
+  try {
+    base.msg.guild.pruneMembers(parseInt(base.args[1]), true, "Removed for inactivity")
+    .then(pruned => {
+      base.utils.sendEmbed(base.msg, `I just pruned ${pruned} members!`, 16733186, 3);
     });
   } catch (e) {
-    msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}prune [days]\``);
-    deleteAfterTime(msg, 2000, 2);
-    console.error(e);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16733186, 3);
   }
 }
 
@@ -182,14 +144,14 @@ function purge(base) {
     });
     base.utils.sendEmbed(base.msg, `${num} messages have been deleted.`, 3447003, 3);
   } catch (err) {
-    console.log(err);
     return base.utils.noArgsFound(base);
   }
 }
 
 function softban(base, usersRemoved) {
   if (base.args.length < 3) {
-    return base.utils.noArgsFound(base);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16733186, 3);
+    return;
   }
   try {
     let userToKick = base.msg.mentions.users.first();
@@ -200,113 +162,87 @@ function softban(base, usersRemoved) {
     sendToModlog(base.msg, "Soft Banned", 16733186, userToKick, kickMsg);
     usersRemoved.push(userToKick);
   } catch (e) {
-    return base.utils.noArgsFound(base);
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16733186, 3);
   }
 }
 
 function warnMembers(base) {
-  let args = msg.cleanContent.split(" ").slice(1);
-  let modlog = msg.guild.channels.find("name", "mod_log");
-  let cmdchat = msg.guild.channels.find("name", "commands");
-  if (msg.channel.type == 'dm') { //limit to guilds only
-    return msg.channel.sendMessage("Unable to use this command in private chat.");
-  } else if (cmdChat && msg.channel.name != "commands") { //limit to command chat if exist
-    return msg.channel.sendMessage(`Please use **${cmdChat.toString()}** chat to use bot commands.`);
-  } else if (!msg.member.hasPermission("MUTE_MEMBERS") && !msg.member.hasPermission("DEAFEN_MEMBERS")) { //limit to memebrs that can mute or deafen members
-    badUserToModlog(msg, "Warn");
-    return msg.reply(`You pleb, you don't have permission to use this command: \`${PREFIX}warn\``);
-  } else if (args.length < 2) { //check for all fields
-    return msg.channel.sendMessage(`You did not define an argument. Usage: \`${PREFIX}warn [user] [reason]\``);
+  if (base.args.length < 3) {
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16774400, 3);
+    return;
   }
-  msg.delete().catch(console.error);
-  let userToWarn = msg.mentions.users.first();
-  let warnMsg = args.slice(1).join(" ");
-  if (sendToDM(msg, "Warned", 16774400, userToWarn, warnMsg)) { // check if user exist
-    if (!sendToModlog(msg, "Warned", 16774400, userToWarn, warnMsg)) {
-      msg.channel.sendMessage("Unable to find **#mod_log** text channel, please consult an admin or server owner.")
-    }
-  } else {
-    msg.channel.sendMessage(`Please **@mention** a user to kick. **${args[0]}** is not a mention.`);
-    deleteAfterTime(msg, 2000, 2);
-    console.log(e);
+  try {
+    let userToWarn = base.msg.mentions.users.first();
+    let warnMsg = base.args.slice(1).join(" ");
+    sendToDM(msg, "Warned", 16774400, userToWarn, warnMsg);
+    sendToModlog(msg, "Warned", 16774400, userToWarn, warnMsg);
+  } catch (e) {
+    base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16774400, 3);
   }
 }
 
 //-----------------------------------| Member Events |---------------------------------------
-exports.memberAdded = (mem, guild, config) => { //New member joined
-  if (config.welcome_pm) {
-    let msgToSend = config.welcome_pm.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user).replace(/$mention/gi, mem.user.username);
-    msgToSend = msgToSend.split(" ").map(word => {
-      if (word.startsWith("#")) {
-        let channel = mem.guild.channels.find("name", word.substr(1));
-        word = channel ? channel : word;
-      }
-    });
+exports.memberAdded = (mem, config, usersRemoved) => { //New member joined
+  let guild = mem.guild;
+  let configGuild = config.find(g => g.guild_id == guild.id);
+  if (configGuild) {
+    let msgToSend = configGuild.welcome_pm.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user).replace(/$mention/gi, mem.user.username);
     mem.user.sendMessage(msgToSend);
   }
-  if (config.welcome_msg) {
-    let msgToSend = config.welcome_msg.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user).replace(/$mention/gi, mem.user.username);
-    mem.guild.channels.find("name", "general").sendMessage(msgToSend);
-  }
-  var modlog = mem.guild.channels.find("name", "mod_log");
-  if (!modlog) {
-    modlog = mem.guild.defaultChannel;
-  }
-  modlog.sendEmbed({
-    color: 3276547,
-    author: {
-      name: mem.displayName + "#" + mem.user.discriminator,
-      icon_url: mem.user.avatarURL
-    },
-    title: `${mem.user.toString()} | User Joined`,
-    description: `User: ${mem.user} joined the server`,
-    timestamp: new Date()
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 3276547,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Joined`,
+      description: `User: ${mem.user} joined the server`,
+      timestamp: new Date()
+    }
   });
+  usersRemoved = usersRemoved.filter(m => m.id != mem.id);
+};
+
+exports.memberRemoved = (mem, config, usersRemoved) => { //Member leaves/kicked
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 285951,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Left`,
+      description: `User: ${mem.user} left the server`,
+      timestamp: new Date()
+    }
+  });
+  usersRemoved.push(mem);
 }
 
-exports.memberRemoved = (mem, guild, usersRemoved) => { //Member leaves/kicked
-  let length = usersRemoved.length;
-  usersRemoved = usersRemoved.filter(member => usersRemoved.indexOf(mem) == -1);
-  if (usersRemoved.length != length) {
-    return usersRemoved;
-  }
-  var modlog = mem.guild.channels.find("name", "mod_log");
-  if (!modlog) {
-    modlog = mem.guild.defaultChannel;
-  }
-  modlog.sendEmbed({
-    color: 285951,
-    author: {
-      name: mem.displayName + "#" + mem.user.discriminator,
-      icon_url: mem.user.avatarURL
-    },
-    title: `${mem.user.toString()} | User Left`,
-    description: `User: ${mem.user} left the server`,
-    timestamp: new Date()
-  });
-  return usersRemoved;
-} //End member mod_log
-
 exports.memberBanned = (mem, guild, usersRemoved) => { //Member Ban
-  let length = usersRemoved.length;
-  usersRemoved = usersRemoved.filter(member => userRemoved.indexOf(mem) == -1);
-  if (usersRemoved.length != length) {
-    return usersRemoved;
-  }
-  var modlog = mem.guild.channels.find("name", "mod_log");
-  if (!modlog) {
-    modlog = mem.guild.defaultChannel;
-  }
-  modlog.sendEmbed({
-    color: 6546816,
-    author: {
-      name: mem.displayName + "#" + mem.user.discriminator,
-      icon_url: user.user.avatarURL
-    },
-    title: `${mem.id.toString()} | User Banned`,
-    description: `User: ${mem.user} was banned`,
-    timestamp: new Date()
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 6546816,
+      author: {
+        name: mem.displayName + "#" + mem.user.discriminator,
+        icon_url: user.user.avatarURL
+      },
+      title: `${mem.id.toString()} | User Banned`,
+      description: `User: ${mem.user} was banned`,
+      timestamp: new Date()
+    }
   });
+  usersRemoved.push(mem);
 }
 
 exports.memberUpdated = (newMem, oldMem) => {
