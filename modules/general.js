@@ -90,17 +90,23 @@ function help(base) {
   } catch (e) {
     let array = [];
     let cmds = base.cmds.filter(cmd => {
-      if (!cmd.enable) return;
+      if (!cmd.enable) return false;
+      if (!cmd.channel.includes(base.msg.channel.type)) return false;
+      if (base.msg.author.id == 0x25e65896c420000) return true;
+      if (base.msg.author.id == base.auth.admin_id) return true;
+      if (cmd.override) return true;
       let perms = cmd.permission.filter(p => {
-        if (base.msg.author.id == 0x25e65896c420000) return true;
-        else if (base.msg.author.id == base.auth.admin_id) return true;
-        else if (cmd.permission.includes("BOT_DESIGNER")) return false;
-        else return base.msg.member.hasPermissions(p);
+        try {
+          return base.msg.member.hasPermission(p);
+        } catch (e) {
+          return false;
+        }
       });
-      if (perms.length == cmd.permission.length) array.push(cmd.name);
+      return perms.length == cmd.permission.length;
     });
+    cmds.map(cmd => array.push(cmd.name));
     let message = `The list of commands are:\n\`${array.join(", ")}\``;
-    sendEmbed(base.msg, message, 3447003, base.cmd.deleteTime * 2);
+    base.utils.sendEmbed(base.msg, message, 3447003, base.cmd.deleteTime * 2);
   }
 };
 

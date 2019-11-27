@@ -40,7 +40,7 @@
   "description": "This command will say the message from the bot account to all servers its a part of.",
   "permission": ["BOT_DESIGNER", "MENTION_EVERYONE", "SEND_TTS_MESSAGES", "EMBED_LINKS"],
   "category": "Reserved",
-  "channel": ["text"],
+  "channel": ["text", "dm"],
   "cooldown": 1,
   "format": "broadcast [message]",
   "example": ["broadcast Hello world!"],
@@ -117,7 +117,7 @@
   "format": "help [command]",
   "example": ["help", "help giveaway"],
   "enable": true,
-  "deleteTime": 5
+  "deleteTime": -1
 }, {
   "name": "info",
   "alias": ["info", "411", "i", "information"],

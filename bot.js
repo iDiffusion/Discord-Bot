@@ -163,16 +163,16 @@ bot.on("message", msg => {
     }
   }
   if (!cmd) return;
-  if (msg.channel.type == "text" && !cmd.channel.includes("text")){
+  if (msg.channel.type == "text" && !cmd.channel.includes("text")) {
     return utils.sendEmbed(msg, `The \"${cmd.name}\" command is current unavailable in text channels. I appologize for the incovenience.`);
   }
   if (msg.channel.type == "dm" && !cmd.channel.includes("dm")) {
-     return utils.sendEmbed(msg, `The \"${cmd.name}\" command is current unavailable in direct messges. I appologize for the incovenience.`);
+    return utils.sendEmbed(msg, `The \"${cmd.name}\" command is current unavailable in direct messges. I appologize for the incovenience.`);
   }
 
   // delete command if specified
-  if (cmd.deleteTime == 0) msg.delete().catch(console.error);
-  else if (cmd.deleteTime > 0) msg.delete(cmd.deleteTime * 1000).catch(console.error);
+  if (msg.channel.type == "text" && cmd.deleteTime == 0) msg.delete().catch(console.error);
+  else if (msg.channel.type == "text" && cmd.deleteTime > 0) msg.delete(cmd.deleteTime * 1000).catch(console.error);
 
   // check if command is enabled
   if (!cmd.enable) {
