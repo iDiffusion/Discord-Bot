@@ -1,6 +1,6 @@
 const underscore = require("underscore");
 
-module.exports = function (base) {
+module.exports = function(base) {
   if (base.cmd.name == "choices") return choices(base);
   else if (base.cmd.name == "coinflip") return coinflip(base);
   else if (base.cmd.name == "rps") return rps(base);
@@ -8,24 +8,24 @@ module.exports = function (base) {
   else if (base.cmd.name == "rolldice") return rolldice(base);
 };
 
-function choices (base) {
+function choices(base) {
   let args = base.args.slice(1).join(" ").split(",").filter(s => s);
   if (args.length == 0) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
-  } else if(args.length == 1){
+  } else if (args.length == 1) {
     return `I choose **${args[0].trim()}**.`;
   } else {
     return `I choose **${underscore.sample(args).trim()}**.`;
   }
 };
 
-function coinflip (base) {
+function coinflip(base) {
   let choices = ["Head", "Tail"];
   let result = underscore.sample(choices);
   return `Result is ${result}.`;
 };
 
-function rps (base) {
+function rps(base) {
   if (base.args.length == 1) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
   }
@@ -60,13 +60,13 @@ function rps (base) {
   return compare(computerChoice, userChoice).replace("$user", base.msg.author.username).replace("$bot", base.bot.user.username);
 };
 
-function reverse (base) {
+function reverse(base) {
   let args = base.args.slice(1).join(" ").split("");
   args.reverse();
   return `Your message reversed is **${args.join("")}**.`;
 };
 
-function rolldice (base) {
+function rolldice(base) {
   let args = base.args.slice(1);
   const numLimit = 10;
   const sideLimit = 100;

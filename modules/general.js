@@ -43,8 +43,8 @@ function apply(base) {
 
 function clean(base) {
   base.msg.channel.fetchMessages().then(msgs => {
-    let msg_array = message.array().filter(message => message.author.id == base.bot.id);
-    msg_array.map(m => m.delete().catch(console.error));
+    let msg_array = msgs.filter(m => m.author.id == base.bot.user.id);
+    msg_array.array().map(m => m.delete().catch(console.error));
   });
 };
 
@@ -85,7 +85,7 @@ function help(base) {
         timestamp: new Date()
       }
     }).then(msg => {
-        msg.delete(base.cmd.deleteTime * 2);
+      msg.delete(base.cmd.deleteTime * 2);
     });
   } catch (e) {
     let array = [];

@@ -18,7 +18,7 @@ function prisolis(base) {
           id: base.msg.guild.id,
           deny: [],
           allow: ["CREATE_INSTANT_INVITE", "VIEW_CHANNEL", "CONNECT", "SPEAK"]
-        },{
+        }, {
           id: 222883669377810434,
           deny: [],
           allow: ["MANAGE_CHANNELS", "MOVE_MEMBERS", "PRIORITY_SPEAKER", "MUTE_MEMBERS", "USE_VAD", "MANAGE_ROLES"]

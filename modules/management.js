@@ -111,9 +111,9 @@ function move(base) {
 function prune(base, usersRemoved) {
   try {
     base.msg.guild.pruneMembers(parseInt(base.args[1]), true, "Removed for inactivity")
-    .then(pruned => {
-      base.utils.sendEmbed(base.msg, `I just pruned ${pruned} members!`, 16733186, 3);
-    });
+      .then(pruned => {
+        base.utils.sendEmbed(base.msg, `I just pruned ${pruned} members!`, 16733186, 3);
+      });
   } catch (e) {
     base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16733186, 3);
   }
