@@ -41,6 +41,7 @@ build/Release
 # Personal directories
 config/
 modules/test.js
+config/auth.json
 
 # Dependency directories
 node_modules/
