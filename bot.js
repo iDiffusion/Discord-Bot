@@ -18,6 +18,8 @@ const utils = require("./modules/utility.js");
 var debug = auth.debug ? auth.debug : false;
 var usersRemoved = [];
 
+//-----------------------------------| Bot Events |---------------------------------------
+
 bot.login(auth.token);
 bot.on('error', e => {
   console.error(e);
@@ -47,6 +49,8 @@ bot.on('ready', () => {
   }
 });
 
+//-----------------------------------| Functions |---------------------------------------
+
 function setbase(prefix, msg, args, cmd) {
   this.PREFIX = prefix;
   this.msg = msg;
@@ -60,10 +64,67 @@ function setbase(prefix, msg, args, cmd) {
   this.utils = utils;
 }
 
+function memberUpdated(oldMem, newMem) {
+  let sendToModlog = function(nameInfo, oldInfo, newInfo) {
+    newMem.guild.channels.find(x => x.name == "mod_log").send({
+      embed: {
+        color: 3276547,
+        author: {
+          name: newMem.user.tag,
+          icon_url: newMem.user.avatarURL
+        },
+        title: `${newMem.user.toString()} | Member Updated`,
+        description: `**Member:** ${newMem.user}\n` +
+          `**${nameInfo}:** ${oldInfo} **to** ${newInfo}`,
+        timestamp: new Date()
+      }
+    }).catch(console.error);
+  };
+  if (oldMem.user.username != newMem.user.username) {
+    sendToModlog("Username", oldMem.user.username, newMem.user.username);
+  } else if (oldMem.displayName != newMem.displayName) {
+    sendToModlog("Nickname", oldMem.displayName, newMem.displayName);
+  } else if (oldMem.user.avatar != newMem.user.avatar) {
+    let url = function(id, avatar) {
+      return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`
+    }
+    sendToModlog("Avatar", url(oldMem.user.id, oldMem.user.avatar), url(newMem.user.id, newMem.user.avatar));
+  } else {
+    console.log(oldMem);
+    console.log(newMem);
+  }
+}
+
+function memberAdded(mem) {
+  let guild = mem.guild;
+  let configGuild = config.find(g => g.guild_id == guild.id);
+  if (configGuild) {
+    let msgToSend = configGuild.welcome_pm.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user).replace(/$mention/gi, mem.user.username);
+    mem.user.sendMessage(msgToSend);
+  }
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 3276547,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Joined`,
+      description: `User: ${mem.user} joined the server`,
+      timestamp: new Date()
+    }
+  });
+  usersRemoved = usersRemoved.filter(m => m.id != mem.id);
+}
+
+//-----------------------------------| Messages |---------------------------------------
+
 bot.on("message", msg => {
   // verify command is send in a server;
   if (msg.channel.type != "text") return;
-  if (msg.guild.id != 0x3b7b9ce0c020000) return; // REMOVE THIS LATER
 
   // verify the author is a user
   if (msg.author.bot) return;
@@ -173,22 +234,68 @@ bot.on("message", msg => {
   if (message && message.trim()) utils.sendEmbed(msg, message);
 });
 
+//-----------------------------------| Member/Guild Events |---------------------------------------
+
 bot.on("guildMemberAdd", mem => {
-  let guild = mem.guild;
-  manage.memberAdded(mem, config, usersRemoved);
+  memberAdded(mem);
 });
 
 bot.on("guildMemberRemove", mem => {
-  let guild = mem.guild;
-  manage.memberRemoved(mem, config, usersRemoved);
+  if (usersRemoved.find(x => x.id == mem.id)) return;
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 285951,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Left`,
+      description: `User: ${mem.user} left the server`,
+      timestamp: new Date()
+    }
+  });
+  usersRemoved.push(mem);
 });
 
 bot.on("guildBanAdd", (guild, mem) => {
-  manage.memberBanned(mem, config, usersRemoved);
+  if (usersRemoved.find(x => x.id == mem.id)) return;
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 6546816,
+      author: {
+        name: mem.user.tag,
+        icon_url: user.user.avatarURL
+      },
+      title: `${mem.id.toString()} | User Banned`,
+      description: `User: ${mem.user} was banned`,
+      timestamp: new Date()
+    }
+  });
+  usersRemoved.push(mem);
 });
 
 bot.on("guildBanRemove", (guild, mem) => {
-  mamange.memberUnbanned(mem, config, usersRemoved);
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 6546816,
+      author: {
+        name: mem.user.tag,
+        icon_url: user.user.avatarURL
+      },
+      title: `${mem.id.toString()} | User Unbanned`,
+      description: `User: ${mem.user} was unbanned`,
+      timestamp: new Date()
+    }
+  });
 });
 
 bot.on("guildCreate", guild => {
@@ -200,11 +307,11 @@ bot.on("guildDelete", guild => {
 });
 
 bot.on("guildMembersChunk", (mem, guild) => {
-  mem.map(m => manage.memberAdded(m, config, usersRemoved));
+  mem.map(m => memberAdded(m));
 });
 
 bot.on("guildMemberUpdate", (oldMem, newMem) => {
-  manage.memberUpdated(oldMem, newMem);
+  memberUpdated(oldMem, newMem);
 });
 
 bot.on("guildUpdate", (oldGuild, newGuild) => {
@@ -212,5 +319,5 @@ bot.on("guildUpdate", (oldGuild, newGuild) => {
 });
 
 bot.on("userUpdate", (oldMem, newMem) => {
-  manage.memberUpdated(oldMem, newMem);
+  memberUpdated(oldMem, newMem);
 });

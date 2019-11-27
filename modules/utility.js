@@ -68,11 +68,11 @@ exports.sendToOwner = (msg, message) => {
 
 exports.noArgsFound = (base) => {
   return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
-}
+};
 
 exports.unauthorizedUser = (base) => {
   return `Im sorry to inform you but you are missing one or more of the requried permissions needed to run this command: \`${base.cmd.name}\`.`;
-}
+};
 
 exports.checkPerm = (base, member) => {
   if (base.cmd.permission.length == 0) return [];
@@ -84,4 +84,4 @@ exports.checkPerm = (base, member) => {
     }
   });
   return perms;
-}
+};

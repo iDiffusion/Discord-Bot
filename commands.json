@@ -129,7 +129,7 @@
   "format": "info [server|user]",
   "example": ["info", "info server", "info @pyro"],
   "enable": true,
-  "deleteTime": -1
+  "deleteTime": 0
 }, {
   "name": "invite",
   "alias": ["invite", "inv"],

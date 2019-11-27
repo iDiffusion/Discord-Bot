@@ -84,6 +84,8 @@ function help(base) {
         },
         timestamp: new Date()
       }
+    }).then(msg => {
+        msg.delete(base.cmd.deleteTime * 2);
     });
   } catch (e) {
     let array = [];
@@ -97,12 +99,13 @@ function help(base) {
       });
       if (perms.length == cmd.permission.length) array.push(cmd.name);
     });
-    return `The list of commands are:\n\`${array.join(", ")}\``;
+    let message = `The list of commands are:\n\`${array.join(", ")}\``;
+    sendEmbed(base.msg, message, 3447003, base.cmd.deleteTime * 2);
   }
 };
 
 function info(base) {
-  if (base.args.length == 1) {
+  if (base.args.length < 2) {
     return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
   } else if (base.args[1].toString().toLowerCase() == 'server') {
     let guild = base.msg.channel.guild;
