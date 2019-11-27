@@ -17,11 +17,11 @@ function apply(base) {
   let args = base.msg.cleanContent.trim().replace(/  +/g, ' ').split(' ');
   let reasonFor = args.slice(2).join(" ");
   if (args.length <= 2) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+    return base.utils.noArgsFound(base);
   }
   let role = base.msg.guild.roles.find(r => args[1].toLowerCase().includes(r.name.toLowerCase()));
   if (!role) {
-    return `Im sorry to inform you but you must have at least one role in order to run this command: \`${base.cmd.name}\`.`;
+    return base.utils.noArgsFound(base);
   }
   base.msg.guild.channels.find(c => c.name == "mod_log").send({
     embed: {
@@ -63,7 +63,7 @@ function giveaway(base) {
       })
     })
     .catch(console.error);
-  return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+  return base.utils.noArgsFound(base);
 };
 
 function help(base) {
@@ -112,7 +112,7 @@ function help(base) {
 
 function info(base) {
   if (base.args.length < 2) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+    return base.utils.noArgsFound(base);
   } else if (base.args[1].toString().toLowerCase() == 'server') {
     let guild = base.msg.channel.guild;
     let botCount = guild.members.filter(mem => mem.user.bot).array().length;
@@ -153,7 +153,7 @@ function info(base) {
       });
     } catch (e) {
       console.log(e);
-      return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+      return base.utils.noArgsFound(base);
     }
   }
 }
@@ -208,7 +208,7 @@ function letsplay(base) {
 
 function say(base) {
   if (base.args.length == 1) {
-    base.utils.noArgsFound(base);
+    return base.utils.noArgsFound(base);
   } else {
     base.msg.channel.send(base.args.slice(1).join(" "));
   }

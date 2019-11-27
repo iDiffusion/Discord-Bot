@@ -86,7 +86,7 @@ function memberUpdated(oldMem, newMem) {
     sendToModlog("Nickname", oldMem.displayName, newMem.displayName);
   } else if (oldMem.user.avatar != newMem.user.avatar) {
     let url = function(id, avatar) {
-      return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`
+      return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`;
     }
     sendToModlog("Avatar", url(oldMem.user.id, oldMem.user.avatar), url(newMem.user.id, newMem.user.avatar));
   } else {

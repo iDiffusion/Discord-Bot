@@ -11,7 +11,7 @@ module.exports = function(base) {
 function choices(base) {
   let args = base.args.slice(1).join(" ").split(",").filter(s => s);
   if (args.length == 0) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+    return base.utils.noArgsFound(base);
   } else if (args.length == 1) {
     return `I choose **${args[0].trim()}**.`;
   } else {
@@ -26,9 +26,7 @@ function coinflip(base) {
 };
 
 function rps(base) {
-  if (base.args.length == 1) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
-  }
+  if (base.args.length == 1) return base.utils.noArgsFound(base);
   let userChoice = base.args[1].toLowerCase();
   let choices = ["rock", "paper", "scissors"];
   let computerChoice = underscore.sample(choices);
@@ -61,6 +59,7 @@ function rps(base) {
 };
 
 function reverse(base) {
+  if(base.args.length == 1) return base.utils.noArgsFound(base);
   let args = base.args.slice(1).join(" ").split("");
   args.reverse();
   return `Your message reversed is **${args.join("")}**.`;
@@ -90,6 +89,6 @@ function rolldice(base) {
     let average = Math.round(sum / valArray.length * 100) / 100;
     return `Your rolls are \`${valArray.join(", ")}\` \n The sum is **${sum}** and the average is **${average}**.`;
   } catch (err) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+    return base.utils.noArgsFound(base);
   }
 };

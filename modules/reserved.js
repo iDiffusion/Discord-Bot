@@ -24,11 +24,12 @@ function blacklist(base) {
     //TODO add user to blacklist
     return `User has been added to the blacklist.`;
   } catch (e) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+    return base.utils.noArgsFound(base);
   }
 };
 
 function broadcast(base) {
+  if(base.args.length == 1) return base.utils.noArgsFound(base);
   base.bot.guilds.map(guild => {
     let channel = guild.channels.find(x => x.name == "general");
     channel = channel ? channel : guild.channels.find(x => x.name == "mod_log");
@@ -63,7 +64,8 @@ function restart(base) {
 };
 
 function set(base) {
-
+  if(base.args.length == 1) return base.utils.noArgsFound(base);
+  //TODO set attributes
 };
 
 function shutdown(base) {
@@ -77,7 +79,7 @@ function shutdown(base) {
 };
 
 function status(base) {
-
+  //TODO send status message
 };
 
 function whitelist(base) {
@@ -92,6 +94,6 @@ function whitelist(base) {
     //TODO add user to whitelist
     return `User has been added to the whitelist.`;
   } catch (e) {
-    return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
+    return base.utils.noArgsFound(base);
   }
 }
