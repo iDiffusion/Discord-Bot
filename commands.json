@@ -251,7 +251,7 @@
   "cooldown": 1,
   "format": "prune",
   "example": ["prune"],
-  "enable": true,
+  "enable": false,
   "deleteTime": 0
 }, {
   "name": "purge",

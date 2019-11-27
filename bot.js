@@ -275,9 +275,9 @@ bot.on("guildBanAdd", (guild, mem) => {
       color: 6546816,
       author: {
         name: mem.user.tag,
-        icon_url: user.user.avatarURL
+        icon_url: mem.user.avatarURL
       },
-      title: `${mem.id.toString()} | User Banned`,
+      title: `${mem.user.toString()} | User Banned`,
       description: `User: ${mem.user} was banned`,
       timestamp: new Date()
     }
@@ -294,9 +294,9 @@ bot.on("guildBanRemove", (guild, mem) => {
       color: 6546816,
       author: {
         name: mem.user.tag,
-        icon_url: user.user.avatarURL
+        icon_url: mem.user.avatarURL
       },
-      title: `${mem.id.toString()} | User Unbanned`,
+      title: `${mem.user.toString()} | User Unbanned`,
       description: `User: ${mem.user} was unbanned`,
       timestamp: new Date()
     }
