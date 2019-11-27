@@ -51,8 +51,8 @@ exports.sendEmbed = (msg, message, color, timer) => {
       description: message
     }
   }).then(msgs => {
-    if(timer > 1){
-      msgs.delete(timer*1000);
+    if (timer > 1) {
+      msgs.delete(timer * 1000);
     }
   }).catch(console.error);
 };
@@ -80,7 +80,7 @@ exports.checkPerm = (base, member) => {
     try {
       return !member.hasPermission(p);
     } catch (e) {
-      return !member.user.bot;
+      return member ? !member.user.bot : (p == "BOT_DESIGNER");
     }
   });
   return perms;

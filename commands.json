@@ -342,7 +342,7 @@
   "name": "set",
   "alias": ["set"],
   "description": "This command allows admins or owners to set key functionailty of the bot such as prefix, welcome/goodbye messages and game of the bot.",
-  "permission": ["ADMIN_ID"],
+  "permission": ["BOT_DESIGNER"],
   "category": "Reserved",
   "channel": ["text", "dm"],
   "cooldown": 1,

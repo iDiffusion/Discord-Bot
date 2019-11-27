@@ -123,14 +123,11 @@ function memberAdded(mem) {
 //-----------------------------------| Messages |---------------------------------------
 
 bot.on("message", msg => {
-  // verify command is send in a server;
-  if (msg.channel.type != "text") return;
-
   // verify the author is a user
   if (msg.author.bot) return;
 
   // set command prefix
-  let server = config.filter(g => msg.guild.id == g.guild_id)[0];
+  let server = config.filter(g => msg.guild && msg.guild.id == g.guild_id)[0];
   let PREFIX = server && server.prefix ? server.prefix : "?";
 
   // split message into arguments
@@ -166,36 +163,11 @@ bot.on("message", msg => {
     }
   }
   if (!cmd) return;
-  if (!cmd.channel.includes("text")) return;
-
-  // check if bot has basic permissions
-  let reqperm = ['SEND_MESSAGES', 'MANAGE_MESSAGES', 'MANAGE_CHANNELS', "EMBED_LINKS"].filter(p => !msg.guild.me.hasPermission(p));
-  if (reqperm.length != 0) {
-    let message = `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`.`;
-    utils.sendEmbed(msg, message);
-    utils.sendToOwner(msg, message + ` In the following server: **${msg.guild}**.`);
-    return;
+  if (msg.channel.type == "text" && !cmd.channel.includes("text")){
+    return utils.sendEmbed(msg, `The \"${cmd.name}\" command is current unavailable in text channels. I appologize for the incovenience.`);
   }
-
-  // check if modlog exist
-  if (!msg.guild.channels.find(x => x.name == "mod_log")) {
-    msg.guild.createChannel('mod_log', {
-      type: 'text',
-      permissionOverwrites: [{
-        id: msg.guild.id,
-        deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
-        allow: []
-      }, {
-        id: msg.guild.me.id,
-        deny: [],
-        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-      }]
-    }).catch(console.error);
-  } else {
-    msg.guild.channels.find(x => x.name == "mod_log").overwritePermissions(msg.guild.me.user, {
-      SEND_MESSAGES: true,
-      VIEW_CHANNEL: true
-    }).catch(console.error);
+  if (msg.channel.type == "dm" && !cmd.channel.includes("dm")) {
+     return utils.sendEmbed(msg, `The \"${cmd.name}\" command is current unavailable in direct messges. I appologize for the incovenience.`);
   }
 
   // delete command if specified
@@ -207,13 +179,45 @@ bot.on("message", msg => {
     return utils.sendEmbed(msg, `\"${cmd.name}\" command is current unavailable, but should be up and running shortly. Please try again later.`);
   }
 
-  // check bot permissions to use command
-  if (!cmd.override) {
-    reqperm = utils.checkPerm(base, msg.guild.me);
+  if (msg.channel.type == "text") {
+    // check if bot has basic permissions
+    let reqperm = ['SEND_MESSAGES', 'MANAGE_MESSAGES', 'MANAGE_CHANNELS', "EMBED_LINKS"].filter(p => !msg.guild.me.hasPermission(p));
     if (reqperm.length != 0) {
-      utils.sendToModlog(msg, `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`. In order to run the **${cmd.name}** command.`);
-      utils.sendEmbed(msg, `Im sorry to inform you but the bot is missing the required permissions needed to run the \`${cmd.name}\` command.`);
+      let message = `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`.`;
+      utils.sendEmbed(msg, message);
+      utils.sendToOwner(msg, message + ` In the following server: **${msg.guild}**.`);
       return;
+    }
+
+    // check if modlog exist
+    if (!msg.guild.channels.find(x => x.name == "mod_log")) {
+      msg.guild.createChannel('mod_log', {
+        type: 'text',
+        permissionOverwrites: [{
+          id: msg.guild.id,
+          deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+          allow: []
+        }, {
+          id: msg.guild.me.id,
+          deny: [],
+          allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+        }]
+      }).catch(console.error);
+    } else {
+      msg.guild.channels.find(x => x.name == "mod_log").overwritePermissions(msg.guild.me.user, {
+        SEND_MESSAGES: true,
+        VIEW_CHANNEL: true
+      }).catch(console.error);
+    }
+
+    // check bot permissions to use command
+    if (!cmd.override) {
+      reqperm = utils.checkPerm(base, msg.guild.me);
+      if (reqperm.length != 0) {
+        utils.sendToModlog(msg, `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`. In order to run the **${cmd.name}** command.`);
+        utils.sendEmbed(msg, `Im sorry to inform you but the bot is missing the required permissions needed to run the \`${cmd.name}\` command.`);
+        return;
+      }
     }
   }
 
@@ -233,7 +237,6 @@ bot.on("message", msg => {
   else if (cmd.category == "Reserved") message = reserved(base);
   if (message && message.trim()) utils.sendEmbed(msg, message);
 });
-
 //-----------------------------------| Member/Guild Events |---------------------------------------
 
 bot.on("guildMemberAdd", mem => {
@@ -241,6 +244,7 @@ bot.on("guildMemberAdd", mem => {
 });
 
 bot.on("guildMemberRemove", mem => {
+  let guild = mem.guild;
   if (usersRemoved.find(x => x.id == mem.id)) return;
   let channel = guild.channels.find(x => x.name == "mod_log");
   channel = channel ? channel : guild.channels.find(x => x.name == "general");
