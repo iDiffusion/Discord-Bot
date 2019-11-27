@@ -157,6 +157,7 @@ bot.on("message", msg => {
       }
     } else if (args[0].slice(1).startsWith("test")) {
       msg.delete().catch(console.error);
+      if (!test) return;
       let message = test(base);
       if (message && message.trim()) utils.sendEmbed(msg, message);
       return;
