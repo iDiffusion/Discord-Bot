@@ -1,314 +1,328 @@
 "use strict";
 
-const Discord = require("discord.js"); //import the discord.js module
-const bot = new Discord.Client(); //create an instance of a Discord Client, and call it bot
+const Discord = require("discord.js");
+const bot = new Discord.Client();
 
-// const CleverBot = require("cleverbot-node");
-// const cleverBot = new CleverBot();
+const auth = require("./config/auth.json");
+const config = require("./config/config.json");
+const cmds = require("./commands.json");
 
-const auth = require("./auth.json"); // import the authorzation file
-const config = require("./config/config.json"); // import the config file
-
-const utils = require("./modules/utility.js");
 const fun = require("./modules/fun.js");
-const basic = require("./modules/basic.js");
-const setup = require("./modules/config.js");
+const general = require("./modules/general.js");
 const manage = require("./modules/management.js");
+const reserved = require("./modules/reserved.js");
+const requested = require("./modules/requested.js");
+const test = require("./config/test.js");
+const utils = require("./modules/utility.js");
 
+var debug = auth.debug ? auth.debug : false;
 var usersRemoved = [];
-const editingCode = true;
 
-bot.login(auth.token);//Login to bot
-bot.on('error', e => { console.error(e); }); //log error to console
-bot.on('warn', e => { console.warn(e); }); //log warning to console
-//bot.on('debug', e => { console.debug(e); }); //log debugs to console
-bot.on('disconnect', () => { console.log('Celestial has left the building!'); }); //log bot disconnected to console
-bot.on('reconneting', () => { console.log('Attempting to find Celestial.'); }); //log bot reconneting to console
-bot.on('ready', () => { //Display ready when bot is active
+//-----------------------------------| Bot Events |---------------------------------------
+
+bot.login(auth.token);
+bot.on('error', e => {
+  console.error(e);
+});
+bot.on('warn', e => {
+  console.warn(e);
+});
+bot.on('disconnect', () => {
+  console.log('Celestial has left the building!');
+});
+bot.on('reconneting', () => {
+  console.log('Attempting to find Celestial.');
+});
+bot.on('resume', () => {
+  console.log('Celestial has been located.');
+});
+bot.on('ready', () => {
   console.log('Celestial is ready to serve!');
-  if(editingCode) {
-    bot.user.setGame('with code');
+  if (auth.debug) {
+    bot.user.setActivity('with code');
   } else {
-    let randNumber = Math.floor(Math.random() * auth.messages.length);
-    bot.user.setGame(auth.messages[randNumber]).replace('#users', bot.users.array().length);
+    let num = Math.floor(Math.random() * auth.messages.length);
+    let message = auth.messages[num]
+      .replace(/#users/gi, bot.users.array().length)
+      .replace(/#servers/gi, bot.guilds.array().length);
+    bot.user.setActivity(message);
   }
 });
 
-bot.on("message", msg => { //Scan messages in text channels
-  var PREFIX = config.prefix;
-  if(msg.channel.type != 'text') return; //If messages is in text channel continue
-  else if(msg.content.startsWith(PREFIX + " ")) return; //If starts with prefix then space return
-  else if(!msg.content.startsWith(PREFIX)) return; //If has prefix continue
-  else if(msg.author.bot) return; //If not a bot continue
+//-----------------------------------| Functions |---------------------------------------
 
-  let cmd = msg.content.substr(1).split(" ")[0];
+function setbase(prefix, msg, args, cmd) {
+  this.PREFIX = prefix;
+  this.msg = msg;
+  this.args = args;
+  this.cmd = cmd;
+  this.debug = debug;
+  this.bot = bot;
+  this.auth = auth;
+  this.config = config;
+  this.cmds = cmds;
+  this.utils = utils;
+}
 
-  switch(cmd){
-    //text chat
-    case 'apply':
-    case 'app':
-    basic.apply(PREFIX, msg);
-    break;
-
-    //text chat
-    case 'ban':
-    usersRemoved = manage.banMembers(PREFIX, msg, bot, usersRemoved);
-    break;
-
-    //text chat
-    case 'choose':
-    case 'pick':
-    fun.choose(PREFIX, msg);
-    break;
-
-    //text chat
-    case 'coin':
-    case 'flip':
-    case 'coinflip':
-    case 'cointoss':
-    fun.coinFlip(PREFIX, msg);
-    break;
-
-    //any chat
-    case 'commands':
-    case 'cmds':
-    utils.commands(PREFIX, msg);
-    break;
-
-    //text chat
-    case 'giveaway':
-    basic.giveaway(PREFIX, msg);
-    break;
-
-    //any chat
-    case 'help':
-    case 'h':
-    utils.help(PREFIX, msg);
-    break;
-
-    //any chat
-    case 'info':
-    case 'i':
-    case '411':
-    utils.information(PREFIX, msg);
-    break;
-
-    //any chat
-    case 'invite':
-    case 'inv':
-    utils.invite(PREFIX, msg, bot, config, auth);
-    break;
-
-    //text chat
-    case 'kick':
-    usersRemoved = manage.kickMembers(PREFIX, msg, bot, usersRemoved);
-    break;
-
-    //text chat
-    case 'letsplay':
-    case 'lp':
-    fun.letsplay(PREFIX, msg);
-    break;
-
-    //text chat
-    case 'move':
-    case 'm':
-    manage.moveMembers(PREFIX, msg, bot);
-    break;
-
-    //any chat
-    case 'ping':
-    utils.ping(PREFIX, msg, bot);
-    break;
-
-    //text chat (my guilds only)
-    case 'prisolis':
-    fun.prisolis(PREFIX, msg, bot, config);
-    break;
-
-    //text chat
-    case 'prune':
-    manage.prune(PREIFX, msg, bot);
-    break;
-
-    //text chat
-    case 'purge':
-    utils.purge(PREFIX, msg, bot);
-    break;
-
-    //text chat
-    case 'reverse':
-    fun.reverseMessage(PREFIX, msg);
-    break;
-
-    //text chat
-    case 'roll':
-    case 'rolldice':
-    case 'dice':
-    fun.rolldice(PREFIX, msg);
-    break;
-
-    // text chat
-    case "rps":
-    fun.rps(PREFIX, msg, bot);
-    break;
-
-    //text chat
-    case 'say':
-    case 'speak':
-    utils.say(PREFIX, msg);
-    break;
-
-    //any chat
-    case 'set':
-    setup.setBot(PREFIX, msg);
-    break;
-
-    //text chat
-    case 'softban':
-    usersRemoved = manage.softBanMembers(PREFIX, msg, bot);
-    break;
-
-    //any chat
-    case 'status':
-    setup.statusBot(PREFIX, msg);
-    break;
-
-    //any chat
-    case 'suggestion':
-    utils.makeSuggestion(PREFIX, msg, bot);
-    break;
-
-    //text chat
-    case 'tabletop':
-    case 'tt':
-    fun.tabletop(PREFIX, msg);
-    break;
-
-    //text chat
-    case 'warn':
-    manage.warnMembers(PREFIX, msg);
-    break;
+function memberUpdated(oldMem, newMem) {
+  let sendToModlog = function(nameInfo, oldInfo, newInfo) {
+    newMem.guild.channels.find(x => x.name == "mod_log").send({
+      embed: {
+        color: 3276547,
+        author: {
+          name: newMem.user.tag,
+          icon_url: newMem.user.avatarURL
+        },
+        title: `${newMem.user.toString()} | Member Updated`,
+        description: `**Member:** ${newMem.user}\n` +
+          `**${nameInfo}:** ${oldInfo} **to** ${newInfo}`,
+        timestamp: new Date()
+      }
+    }).catch(console.error);
+  };
+  if (oldMem.user.username != newMem.user.username) {
+    sendToModlog("Username", oldMem.user.username, newMem.user.username);
+  } else if (oldMem.displayName != newMem.displayName) {
+    sendToModlog("Nickname", oldMem.displayName, newMem.displayName);
+  } else if (oldMem.user.avatar != newMem.user.avatar) {
+    let url = function(id, avatar) {
+      return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`;
+    }
+    sendToModlog("Avatar", url(oldMem.user.id, oldMem.user.avatar), url(newMem.user.id, newMem.user.avatar));
+  } else {
+    console.log(oldMem);
+    console.log(newMem);
   }
-});
+}
+
+function memberAdded(mem) {
+  let guild = mem.guild;
+  let configGuild = config.find(g => g.guild_id == guild.id);
+  if (configGuild) {
+    let msgToSend = configGuild.welcome_pm.replace(/$server/gi, mem.guild.name).replace(/$user/gi, mem.user).replace(/$mention/gi, mem.user.username);
+    mem.user.sendMessage(msgToSend);
+  }
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 3276547,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Joined`,
+      description: `User: ${mem.user} joined the server`,
+      timestamp: new Date()
+    }
+  });
+  usersRemoved = usersRemoved.filter(m => m.id != mem.id);
+}
+
+//-----------------------------------| Messages |---------------------------------------
 
 bot.on("message", msg => {
-  var PREFIX = auth.prefix;
-  if(msg.channel.type != 'dm') return; //If messages is in text channel continue
-  else if(msg.author.bot) return; //If not a bot continue
+  // verify the author is a user
+  if (msg.author.bot) return;
 
-  var command = [];
+  // set command prefix
+  let server = config.filter(g => msg.guild && msg.guild.id == g.guild_id)[0];
+  let PREFIX = server && server.prefix ? server.prefix : "?";
 
-  command.push(msg.content.substr(1).split(/ +/g)[0]);
-  command.push(msg.content.split(/ +/g)[0]);
+  // split message into arguments
+  let args = msg.content.trim().replace(/  +/g, ' ').split(' ');
+  if (!args[0].startsWith(PREFIX)) return;
+  if (args[0].replace(/[^A-Za-z]/g, '').length == 0) return;
 
-  command.map(cmd => {
-    switch(cmd){
-      //dm chat
-      case 'clean':
-      utils.cleanMessages(PREFIX, msg, bot);
-      break;
+  // find command specified
+  let cmd = utils.getCommand(cmds, args[0].toLowerCase().substr(1));
+  let base = new setbase(PREFIX, msg, args, cmd);
 
-      //any chat
-      case 'commands':
-      case 'cmds':
-      utils.commands(PREFIX, msg);
-      break;
+  // verify the command is text
+  if (msg.author.id == auth.admin_id || msg.author.id == 0x25e65896c420000) {
+    if (args[0].slice(1).startsWith("eval")) {
+      msg.delete().catch(console.error);
+      try {
+        const code = msg.cleanContent.trim().replace(/  +/g, ' ').split(' ').slice(1).join(' ');
+        let evaled = eval(code);
+        if (typeof evaled !== "string") {
+          evaled = require("util").inspect(evaled);
+        }
+        return message.channel.send(utils.clean(evaled), {
+          code: "xl"
+        });
+      } catch (err) {
+        return msg.channel.send(`\`ERROR\` \`\`\`xl\n${utils.clean(err)}\n\`\`\``);
+      }
+    } else if (args[0].slice(1).startsWith("test")) {
+      msg.delete().catch(console.error);
+      if (!test) return;
+      let message = test(base);
+      if (message && message.trim()) utils.sendEmbed(msg, message);
+      return;
+    }
+  }
+  if (!cmd) return;
+  if (msg.channel.type == "text" && !cmd.channel.includes("text")) {
+    return utils.sendEmbed(msg, `The \"${cmd.name}\" command is current unavailable in text channels. I appologize for the incovenience.`);
+  }
+  if (msg.channel.type == "dm" && !cmd.channel.includes("dm")) {
+    return utils.sendEmbed(msg, `The \"${cmd.name}\" command is current unavailable in direct messges. I appologize for the incovenience.`);
+  }
 
-      //dm chat
-      case 'eval':
-      case 'e':
-      setup.evalcmd(PREFIX, msg, bot);
-      break;
+  // delete command if specified
+  if (msg.channel.type == "text" && cmd.deleteTime == 0) msg.delete().catch(console.error);
+  else if (msg.channel.type == "text" && cmd.deleteTime > 0) msg.delete(cmd.deleteTime * 1000).catch(console.error);
 
-      //any chat
-      case 'help':
-      case 'h':
-      utils.help(PREFIX, msg);
-      break;
+  // check if command is enabled
+  if (!cmd.enable) {
+    return utils.sendEmbed(msg, `\"${cmd.name}\" command is current unavailable, but should be up and running shortly. Please try again later.`);
+  }
 
-      //any chat
-      case 'info':
-      case 'i':
-      case '411':
-      utils.information(PREFIX, msg, bot);
-      break;
+  if (msg.channel.type == "text") {
+    // check if bot has basic permissions
+    let reqperm = ['SEND_MESSAGES', 'MANAGE_MESSAGES', 'MANAGE_CHANNELS', "EMBED_LINKS"].filter(p => !msg.guild.me.hasPermission(p));
+    if (reqperm.length != 0) {
+      let message = `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`.`;
+      utils.sendEmbed(msg, message);
+      utils.sendToOwner(msg, message + ` In the following server: **${msg.guild}**.`);
+      return;
+    }
 
-      //any chat
-      case 'invite':
-      case 'inv':
-      utils.invite(PREFIX, msg, bot, config, auth);
-      break;
+    // check if modlog exist
+    if (!msg.guild.channels.find(x => x.name == "mod_log")) {
+      msg.guild.createChannel('mod_log', {
+        type: 'text',
+        permissionOverwrites: [{
+          id: msg.guild.id,
+          deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+          allow: []
+        }, {
+          id: msg.guild.me.id,
+          deny: [],
+          allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+        }]
+      }).catch(console.error);
+    } else {
+      msg.guild.channels.find(x => x.name == "mod_log").overwritePermissions(msg.guild.me.user, {
+        SEND_MESSAGES: true,
+        VIEW_CHANNEL: true
+      }).catch(console.error);
+    }
 
-      //any chat
-      case 'ping':
-      utils.ping(PREFIX, msg, bot);
-      break;
+    // check bot permissions to use command
+    if (!cmd.override) {
+      reqperm = utils.checkPerm(base, msg.guild.me);
+      if (reqperm.length != 0) {
+        utils.sendToModlog(msg, `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`. In order to run the **${cmd.name}** command.`);
+        utils.sendEmbed(msg, `Im sorry to inform you but the bot is missing the required permissions needed to run the \`${cmd.name}\` command.`);
+        return;
+      }
+    }
+  }
 
-      //any chat
-      case 'set':
-      setup.setBot(PREFIX, msg);
-      break;
+  // check user permission to use command
+  if (msg.author.id == auth.admin_id || msg.author.id == 0x25e65896c420000);
+  else if (cmd.override || utils.checkPerm(base, msg.member).length == 0);
+  else {
+    return utils.sendEmbed(msg, utils.unauthorizedUser(base));
+  }
 
-      //any chat
-      case 'status':
-      setup.statusBot(PREFIX, msg);
-      break;
+  //Run the command specified
+  let message;
+  if (cmd.category == "General") message = general(base);
+  else if (cmd.category == "Fun") message = fun(base);
+  else if (cmd.category == "Moderation") message = manage(base, usersRemoved);
+  else if (cmd.category == "Requested") message = requested(base);
+  else if (cmd.category == "Reserved") message = reserved(base);
+  if (message && message.trim()) utils.sendEmbed(msg, message);
+});
+//-----------------------------------| Member/Guild Events |---------------------------------------
 
-      //any chat
-      case 'suggestion':
-      utils.makeSuggestion(PREFIX, msg, bot, config);
-      break;
+bot.on("guildMemberAdd", mem => {
+  memberAdded(mem);
+});
+
+bot.on("guildMemberRemove", mem => {
+  let guild = mem.guild;
+  if (usersRemoved.find(x => x.id == mem.id)) return;
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 285951,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Left`,
+      description: `User: ${mem.user} left the server`,
+      timestamp: new Date()
+    }
+  });
+  usersRemoved.push(mem);
+});
+
+bot.on("guildBanAdd", (guild, mem) => {
+  if (usersRemoved.find(x => x.id == mem.id)) return;
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 6546816,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Banned`,
+      description: `User: ${mem.user} was banned`,
+      timestamp: new Date()
+    }
+  });
+  usersRemoved.push(mem);
+});
+
+bot.on("guildBanRemove", (guild, mem) => {
+  let channel = guild.channels.find(x => x.name == "mod_log");
+  channel = channel ? channel : guild.channels.find(x => x.name == "general");
+  channel = channel ? channel : guild.channels[0];
+  channel.send({
+    embed: {
+      color: 6546816,
+      author: {
+        name: mem.user.tag,
+        icon_url: mem.user.avatarURL
+      },
+      title: `${mem.user.toString()} | User Unbanned`,
+      description: `User: ${mem.user} was unbanned`,
+      timestamp: new Date()
     }
   });
 });
 
-bot.on("guildMemberAdd", mem => { //Member joins guils
-  let guild =  mem.guild;
-  manage.memberAdded(mem, guild);
-});
-
-bot.on("guildMemberRemove", mem => { //Member leaves/kicked
-  let guild =  mem.guild;
-  manage.memberRemoved(mem, guild, usersRemoved);
-});
-
-bot.on("guildBanAdd", (guild, mem) => { //Member Banned
-  manage.memberBanned(mem, guild, usersRemoved);
-});
-
-/*
-bot.on("guildBanRemove", (guild, mem) => { //Member Unbanned
-  memberUnbanned(mem, guild);
-});
-*/
-
-bot.on("guildCreate", guild => { //Client joins a new guild
+bot.on("guildCreate", guild => {
   console.log(`New guild added: ${guild}.`);
 });
 
-bot.on("guildDelete", guild => { //CLient leaves guild or guild is deleted
+bot.on("guildDelete", guild => {
   console.log(`Old guild left/deleted: ${guild}.`);
 });
 
-bot.on("guildMembersChunk", (mem, guild) => { //Members joins guild
-  mem.map(m => memberAdded(m, guild));
+bot.on("guildMembersChunk", (mem, guild) => {
+  mem.map(m => memberAdded(m));
 });
 
-bot.on("guildMemberUpdate", (oldMem, newMem) => { //Member updates info
-  manage.memberUpdated(oldMem, newMem);
+bot.on("guildMemberUpdate", (oldMem, newMem) => {
+  memberUpdated(oldMem, newMem);
 });
 
-bot.on("guildUpdate", (oldGuild, newGuild) => { //Guild updates info
+bot.on("guildUpdate", (oldGuild, newGuild) => {
   console.log(`${oldGuild.name} has changed the name to ${newGuild.name}.`);
 });
 
-/*
-bot.on("presenceUpdate", (oldMem, newMem) => { //Member updates presence
-  console.log(`${oldMem.username}`)
-});
-*/
-
-bot.on("userUpdate", (oldMem, newMem) => { //Member updats info
-  manage.memberUpdated(oldMem, newMem);
+bot.on("userUpdate", (oldMem, newMem) => {
+  memberUpdated(oldMem, newMem);
 });
