@@ -134,7 +134,7 @@ function info(base) {
   } else {
     try {
       let user = base.args[1].toString().toLowerCase() == 'bot' ? base.bot.user : base.msg.mentions.users.first();
-      console.log(user);
+      if(base.debug) console.log(user);
       base.msg.channel.send({
         embed: {
           color: 3447003,
@@ -227,9 +227,9 @@ function tabletop(base) {
         'allow': ["MANAGE_MESSAGES", "MANAGE_CHANNELS", "MENTION_EVERYONE", "MANAGE_ROLES", "MANAGE_CHANNELS"]
       }]
     });
-    return `Text channal named #${channelName} has been created. Admins please use \`${base.PREFIX + base.cmd.format}\` to delete the channel after use.`;
+    return `Text channal named #tabletop has been created. Admins please use \`${base.PREFIX + base.cmd.format}\` to delete the channel after use.`;
   } else {
     table.delete().catch(console.error);
-    return `Text channel named #${channelName} has been deleted.`;
+    return `Text channel named #tabletop has been deleted.`;
   }
 }

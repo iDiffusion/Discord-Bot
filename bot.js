@@ -80,16 +80,21 @@ function memberUpdated(oldMem, newMem) {
       }
     }).catch(console.error);
   };
-  if (oldMem.user.username != newMem.user.username) {
-    sendToModlog("Username", oldMem.user.username, newMem.user.username);
-  } else if (oldMem.displayName != newMem.displayName) {
-    sendToModlog("Nickname", oldMem.displayName, newMem.displayName);
-  } else if (oldMem.user.avatar != newMem.user.avatar) {
-    let url = function(id, avatar) {
-      return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`;
+  try{
+    if (oldMem.user.username != newMem.user.username) {
+      sendToModlog("Username", oldMem.user.username, newMem.user.username);
+    } else if (oldMem.displayName != newMem.displayName) {
+      sendToModlog("Nickname", oldMem.displayName, newMem.displayName);
+    } else if (oldMem.user.avatar != newMem.user.avatar) {
+      let url = function(id, avatar) {
+        return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`;
+      }
+      sendToModlog("Avatar", url(oldMem.user.id, oldMem.user.avatar), url(newMem.user.id, newMem.user.avatar));
+    } else {
+      console.log(oldMem);
+      console.log(newMem);
     }
-    sendToModlog("Avatar", url(oldMem.user.id, oldMem.user.avatar), url(newMem.user.id, newMem.user.avatar));
-  } else {
+  } catch(e){
     console.log(oldMem);
     console.log(newMem);
   }

@@ -8,12 +8,12 @@ module.exports = function(base, usersRemoved) {
   else if (base.cmd.name == "prune") return prune(base, usersRemoved);
   else if (base.cmd.name == "purge") return purge(base);
   else if (base.cmd.name == "softban") return softban(base, usersRemoved);
-  else if (base.cmd.name == "warn") return warn(base);
+  else if (base.cmd.name == "warn") return warnMembers(base);
 }
 
 function sendToModlog(msg, action, color, user, message) {
   try {
-    msg.guild.channels.find("name", "mod_log").send({
+    msg.guild.channels.find(c => c.name == "mod_log").send({
       embed: {
         color: color,
         author: {
@@ -174,9 +174,10 @@ function warnMembers(base) {
   try {
     let userToWarn = base.msg.mentions.users.first();
     let warnMsg = base.args.slice(1).join(" ");
-    sendToDM(msg, "Warned", 16774400, userToWarn, warnMsg);
-    sendToModlog(msg, "Warned", 16774400, userToWarn, warnMsg);
+    sendToDM(base.msg, "Warned", 16774400, userToWarn, warnMsg);
+    sendToModlog(base.msg, "Warned", 16774400, userToWarn, warnMsg);
   } catch (e) {
+    console.log(e);
     base.utils.sendEmbed(base.msg, base.utils.noArgsFound(base), 16774400, 3);
   }
 }
