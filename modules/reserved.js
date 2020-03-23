@@ -29,7 +29,7 @@ function blacklist(base) {
 };
 
 function broadcast(base) {
-  if(base.args.length == 1) return base.utils.noArgsFound(base);
+  if (base.args.length == 1) return base.utils.noArgsFound(base);
   base.bot.guilds.map(guild => {
     let channel = guild.channels.find(x => x.name == "general");
     channel = channel ? channel : guild.channels.find(x => x.name == "mod_log");
@@ -64,7 +64,7 @@ function restart(base) {
 };
 
 function set(base) {
-  if(base.args.length == 1) return base.utils.noArgsFound(base);
+  if (base.args.length == 1) return base.utils.noArgsFound(base);
   //TODO set attributes
 };
 

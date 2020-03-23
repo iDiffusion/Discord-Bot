@@ -59,7 +59,7 @@ function rps(base) {
 };
 
 function reverse(base) {
-  if(base.args.length == 1) return base.utils.noArgsFound(base);
+  if (base.args.length == 1) return base.utils.noArgsFound(base);
   let args = base.args.slice(1).join(" ").split("");
   args.reverse();
   return `Your message reversed is **${args.join("")}**.`;

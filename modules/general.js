@@ -134,7 +134,7 @@ function info(base) {
   } else {
     try {
       let user = base.args[1].toString().toLowerCase() == 'bot' ? base.bot.user : base.msg.mentions.users.first();
-      if(base.debug) console.log(user);
+      if (base.debug) console.log(user);
       base.msg.channel.send({
         embed: {
           color: 3447003,

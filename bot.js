@@ -80,7 +80,7 @@ function memberUpdated(oldMem, newMem) {
       }
     }).catch(console.error);
   };
-  try{
+  try {
     if (oldMem.user.username != newMem.user.username) {
       sendToModlog("Username", oldMem.user.username, newMem.user.username);
     } else if (oldMem.displayName != newMem.displayName) {
@@ -94,7 +94,7 @@ function memberUpdated(oldMem, newMem) {
       console.log(oldMem);
       console.log(newMem);
     }
-  } catch(e){
+  } catch (e) {
     console.log(oldMem);
     console.log(newMem);
   }

@@ -1,12 +1,10 @@
 {
-  "apps": [
-    {
-      "name": "Celestial",
-      "script": "./bot.js",
-      "watch": true,
-      "args": "--color",
-      "out_file": "./config/out.txt",
-      "error_file": "./config/error.txt"
-    }
-  ]
+  "apps": [{
+    "name": "Celestial",
+    "script": "./bot.js",
+    "watch": true,
+    "args": "--color",
+    "out_file": "./config/out.txt",
+    "error_file": "./config/error.txt"
+  }]
 }
