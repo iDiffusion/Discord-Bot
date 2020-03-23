@@ -85,7 +85,7 @@ function help(base) {
         timestamp: new Date()
       }
     }).then(msg => {
-      msg.delete(base.cmd.deleteTime * 2);
+      msg.delete(5000);
     });
   } catch (e) {
     let array = [];
@@ -106,7 +106,7 @@ function help(base) {
     });
     cmds.map(cmd => array.push(cmd.name));
     let message = `The list of commands are:\n\`${array.join(", ")}\``;
-    base.utils.sendEmbed(base.msg, message, 3447003, base.cmd.deleteTime * 2);
+    base.utils.sendEmbed(base.msg, message, 3447003, 5);
   }
 };
 
