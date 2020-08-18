@@ -13,7 +13,7 @@ module.exports = {
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
 		let choices = ["Head", "Tail"];
-	    let result = base.underscore.sample(choices);
-	    return `Result is ${result}.`;
+	    let result = base.utils.sample(choices);
+	    base.sendEmbed(msg,`Result is ${result}.`);
 	}
 };

@@ -1,9 +1,9 @@
 module.exports = {
 	name: "broadcast",
   	aliases: ["broadcast","announce"],
- 	description: "This command will say the message from the bot account to all servers its a part of.",
+ 	description: "This command will say a message from the bot account to all servers it's a part of.",
 	permissionsBot: [],
-	permissionsUser: ["BOT_DESIGNER"],
+	permissionsUser: ["DEVELOPER"],
 	channels: ["text", "dm"],
 	cooldown: 1,
 	usage: "broadcast [message]",

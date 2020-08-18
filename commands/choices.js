@@ -1,3 +1,4 @@
+
 module.exports = {
 	name: "choices",
   	aliases: ["choose", "choice", "choices"],
@@ -14,11 +15,11 @@ module.exports = {
 	execute(base, prefix, msg, args) {
 		args = args.join(" ").split(",").filter(s => s);
 		if (args.length == 0) {
-			return base.utils.noArgsFound(base);
+			base.utils.noArgsFound(msg, prefix, this);
 		} else if (args.length == 1) {
-			return `I choose **${args[0].trim()}**.`;
+			base.utils.sendEmbed(msg,`I choose **${args[0].trim()}**.`);
 		} else {
-			return `I choose **${underscore.sample(args).trim()}**.`;
+			base.utils.sendEmbed(msg, `I choose **${base.utils.sample(args)}**.`);
 		}
 	}
 };

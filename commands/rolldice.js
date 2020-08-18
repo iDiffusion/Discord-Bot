@@ -32,9 +32,9 @@ module.exports = {
 			}
 			let sum = valArray.reduce((total, current) => current += total);
 			let average = Math.round(sum / valArray.length * 100) / 100;
-			return `Your rolls are \`${valArray.join(", ")}\` \n The sum is **${sum}** and the average is **${average}**.`;
+			base.utils.sendEmbed(msg, `Your rolls are \`${valArray.join(", ")}\` \n The sum is **${sum}** and the average is **${average}**.`);
 		} catch (err) {
-			return base.utils.noArgsFound(this, msg, prefix);
+			return base.utils.noArgsFound(msg, prefix, this);
 		}
 	}
 };

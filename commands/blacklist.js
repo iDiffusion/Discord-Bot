@@ -13,17 +13,17 @@ module.exports = {
     deleteResp: -1,
     execute(base, prefix, msg, args) {
         try {
-            let user = msg.mentions.users.array();
+            let users = msg.mentions.users.array();
             if (args.indexOf('-r') != -1) {
                 //TODO remove user from blacklist
-                return `Users have been removed from the blacklist.`;
-            } else if (args.indexOf('-r') != -1) {
+                console.log(`Users have been removed from the blacklist.`, users);
+            } else if (args.indexOf('-a') != -1) {
                 let reason = args.join(" ");
                 //TODO add user to blacklist
-                return `Users have been added to the blacklist.`;
+                console.log(`Users have been added to the blacklist.`, users);
             } else {
                 //TODO display blacklisted users
-                return `There are no blacklisted users at this time.`
+                console.log(`There are no blacklisted users at this time.`, users);
             }
         } catch (e) {
             return base.utils.noArgsFound(msg, prefix, cmd, 5);

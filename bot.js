@@ -44,14 +44,14 @@ bot.on('resume', () => {
 });
 bot.on('ready', () => {
     console.log('Celestial is ready to serve!');
-    if (auth.debug) {
+    if ( debug ) {
         bot.user.setActivity('with code');
     } else {
-        let num = Math.floor(Math.random() * auth.messages.length);
-        let message = auth.messages[num]
-            .replace(/#users/gi, bot.users.array().length)
-            .replace(/#servers/gi, bot.guilds.array().length);
-        bot.user.setActivity(message);
+        var num = Math.floor(Math.random() * auth.messages.length);
+        var message = auth.messages[num]
+            .replace(/<users>/gi, bot.users.array().length)
+            .replace(/<servers>/gi, bot.guilds.array().length);
+        bot.user.setActivity(message, { type: 'LISTENING'}).catch(console.error);
     }
 });
 
@@ -68,7 +68,7 @@ var base = {
 };
 
 function memberUpdated(oldMem, newMem) {
-    let sendToModlog = function(nameInfo, oldInfo, newInfo) {
+    var sendToModlog = function(nameInfo, oldInfo, newInfo) {
         newMem.guild.channels.find(x => x.name == "mod_log").send({
             embed: {
                 color: 3276547,
@@ -89,7 +89,7 @@ function memberUpdated(oldMem, newMem) {
         } else if (oldMem.displayName != newMem.displayName) {
             sendToModlog("Nickname", oldMem.displayName, newMem.displayName);
         } else if (oldMem.user.avatar != newMem.user.avatar) {
-            let url = function(id, avatar) {
+            var url = function(id, avatar) {
                 return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`;
             }
             sendToModlog("Avatar", url(oldMem.user.id, oldMem.user.avatar), url(newMem.user.id, newMem.user.avatar));
@@ -110,19 +110,19 @@ bot.on("message", msg => {
     if (msg.author.bot) return;
 
     // set command prefix
-    let server = mysql.guild(base, msg.guild);
-    let prefix = server.Prefix;
+    var server = mysql.guild(base, msg.guild);
+    var prefix = server.Prefix;
 
     // split message into arguments
     if (!msg.content.trim().startsWith(prefix)) return;
-    let args = msg.content.trim().replace(/  +/g, ' ').split(' ');
+    var args = msg.content.trim().replace(/  +/g, ' ').split(' ');
 
     // find command specified
-    let cmdName = args.shift().toLowerCase().slice(prefix.length);
+    var cmdName = args.shift().toLowerCase().slice(prefix.length);
     const cmd = bot.commands.get(cmdName) || bot.commands.find(command => command.aliases && command.aliases.includes(cmdName));
     if (!cmd) return;
 
-    // ensre command works in channel
+    // ensure command works in channel
     if (!cmd.channels.includes(msg.channel.type)) {
         return utils.sendEmbed(msg, `The \"${cmd.name}\" command is currently unavailable in ${msg.channel.type == 'text'? "text channels" : "direct messages"}. I appologize for the incovenience.`);
     }
@@ -138,9 +138,9 @@ bot.on("message", msg => {
 
     if (msg.channel.type == "text") {
         // check if bot has basic permissions
-        let reqperm = ['SEND_MESSAGES', 'MANAGE_MESSAGES', 'MANAGE_CHANNELS', 'EMBED_LINKS'].filter(p => !msg.guild.me.hasPermission(p));
+        var reqperm = ['SEND_MESSAGES', 'MANAGE_MESSAGES', 'MANAGE_CHANNELS', 'EMBED_LINKS'].filter(p => !msg.guild.me.hasPermission(p));
         if (reqperm.length != 0) {
-            let message = `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`.`;
+            var message = `Please give ${msg.guild.me.user} the following permissions: \`${reqperm.join(", ")}\`.`;
             utils.sendEmbed(msg, message);
             utils.sendToOwner(msg, message + ` In the following server: **${msg.guild}**.`);
             return;
@@ -201,20 +201,20 @@ bot.on("message", msg => {
 //-----------------------------------| Member/Guild Events |---------------------------------------
 
 bot.on("guildMemberAdd", mem => {
-    let guild = mem.guild;
-    let server = mysql.guild(base, mem.guild);
+    var guild = mem.guild;
+    var server = mysql.guild(base, mem.guild);
     if (server.WelcomePM) {
-        let msgToSend = server.WelcomePM.replace(/##SERVER##/gi, mem.guild.name).replace(/##USER##/gi, mem.user).replace(/##USERNAME/gi, mem.user.username);
+        var msgToSend = server.WelcomePM.replace(/##SERVER##/gi, mem.guild.name).replace(/##USER##/gi, mem.user).replace(/##USERNAME/gi, mem.user.username);
         mem.user.sendMessage(msgToSend).catch(console.error);
     }
 	if (server.WelcomeChannel && server.WelcomeMsg) {
-        let msgToSend = server.WelcomeMsg.replace(/##SERVER##/gi, mem.guild.name).replace(/##USER##/gi, mem.user).replace(/##USERNAME/gi, mem.user.username);
-        let chanToSend = mem.guild.channels.find(chan => chan.id = server.WelcomeChannel)
+        var msgToSend = server.WelcomeMsg.replace(/##SERVER##/gi, mem.guild.name).replace(/##USER##/gi, mem.user).replace(/##USERNAME/gi, mem.user.username);
+        var chanToSend = mem.guild.channels.find(chan => chan.id = server.WelcomeChannel)
 		if (chanToSend) {
 			chanToSend.send(msgToSend).catch(console.error).catch(console.error);
 		}
     }
-    let channel = guild.channels.find(x => x.name == "mod_log");
+    var channel = guild.channels.find(x => x.name == "mod_log");
     channel.send({
         embed: {
             color: 3276547,
@@ -231,9 +231,9 @@ bot.on("guildMemberAdd", mem => {
 });
 
 bot.on("guildMemberRemove", mem => {
-    let guild = mem.guild;
+    var guild = mem.guild;
     if (bot.usersRemoved.find(x => x.id == mem.id)) return;
-    let channel = guild.channels.find(x => x.name == "mod_log");
+    var channel = guild.channels.find(x => x.name == "mod_log");
     channel.send({
         embed: {
             color: 285951,
@@ -251,7 +251,7 @@ bot.on("guildMemberRemove", mem => {
 
 bot.on("guildBanAdd", (guild, mem) => {
     if (bot.usersRemoved.find(x => x.id == mem.id)) return;
-    let channel = guild.channels.find(x => x.name == "mod_log");
+    var channel = guild.channels.find(x => x.name == "mod_log");
     channel.send({
         embed: {
             color: 6546816,
@@ -268,7 +268,7 @@ bot.on("guildBanAdd", (guild, mem) => {
 });
 
 bot.on("guildBanRemove", (guild, mem) => {
-    let channel = guild.channels.find(x => x.name == "mod_log");
+    var channel = guild.channels.find(x => x.name == "mod_log");
     channel.send({
         embed: {
             color: 6546816,

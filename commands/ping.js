@@ -12,6 +12,8 @@ module.exports = {
 	deleteCmd: -1,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
-		return `pong!\`${Math.ceil(base.bot.ping)}ms\``;
+		msg.channel.send('Pong!')
+		.then( newMsg => newMsg.edit(`Pong! \`${Math.ceil(base.bot.ping)}ms\``))
+		.catch(console.error);
 	}
 };

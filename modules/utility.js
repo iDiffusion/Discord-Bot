@@ -138,6 +138,10 @@ exports.noArgsFound = (msg, prefix, cmd, timer) => {
     return this.sendEmbed(msg, `You did not define an argument. Usage: \`${prefix + cmd.usage}\``, timer);
 };
 
+exports.noArgsFound = (msg, prefix, cmd, timer, color) => {
+    return this.sendEmbed(msg, `You did not define an argument. Usage: \`${prefix + cmd.usage}\``, timer, color);
+};
+
 exports.unauthorizedUser = (msg, cmd) => {
     return this.sendEmbed(msg, `Im sorry to inform you but you are missing one or more of the requried permissions needed to run this command: \`${cmd.name}\`.`, cmd.deleteResp);
 };
@@ -161,3 +165,10 @@ exports.checkUserPerms = (base, cmd, member) => {
     });
     return perms;
 };
+
+exports.sample = (array) => {
+    let length = array.length;
+    let index = Math.floor(Math.random() * length);
+    if( index >= length ) index = length - 1;
+    return array[index];
+}

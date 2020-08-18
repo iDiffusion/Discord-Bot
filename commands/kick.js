@@ -12,19 +12,18 @@ module.exports = {
 	deleteCmd: 0,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
-		if (args.length < 3) {
-			base.utils.sendEmbed(msg, base.utils.noArgsFound(base), 16733186, 3);
-			return;
+		if (args.length < 2) {
+			return base.utils.noArgsFound(msg, prefix, this, 3, 16733186);
 		}
 		try {
 			let userToKick = msg.mentions.users.first();
-			let kickMsg = args.slice(2).join(" ");
-			msg.guild.member(userToKick).kick();+
-			sendToDM(msg, "Kicked", 16733186, userToKick, kickMsg);
-			sendToModlog(msg, "Kicked", 16733186, userToKick, kickMsg);
-			usersRemoved.push(userToKick);
+			let kickMsg = args.slice(1).join(" ");
+			msg.guild.member(userToKick).kick();
+			base.utils.sendActionToDM(msg, "Kicked", 16733186, userToKick, kickMsg);
+			base.utils.sendActionToModlog(msg, "Kicked", 16733186, userToKick, kickMsg);
+			base.usersRemoved.push(userToKick);
 		} catch (e) {
-			base.utils.sendEmbed(msg, base.utils.noArgsFound(base), 16733186, 3);
+			base.utils.noArgsFound(msg, prefix, this, 3, 16733186);
 			return;
 		}
 	}

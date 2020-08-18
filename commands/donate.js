@@ -12,6 +12,7 @@ module.exports = {
 	deleteCmd: 0,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
-		return `pong!\`${Math.ceil(base.bot.ping)}ms\``;
+		let donate_link = base.auth.donate_link ? base.auth.donate_link : "https://www.paypal.me/ikaikalee";
+	    base.utils.sendEmbed(msg,`If you would like to make any donations, please use the following link:\n${donate_link}`);
 	}
 };
