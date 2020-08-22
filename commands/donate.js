@@ -9,7 +9,7 @@ module.exports = {
 	usage: "donate",
 	examples: ["donate"],
 	enable: true,
-	deleteCmd: 0,
+	deleteCmd: -1,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
 		let donate_link = base.auth.donate_link ? base.auth.donate_link : "https://www.paypal.me/ikaikalee";

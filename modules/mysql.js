@@ -8,6 +8,9 @@ exports.log = (action, user, extras) => {
 
 exports.guild = (base, guild) => {
     //TODO write guild function to create guild unless exist and return data
+    if (!guild) {
+        return {ID: 0, Prefix: ''};
+    }
     var server = base.config.find(g => guild && guild.id == g.ID);
     if (server == undefined) {
         var newGuild = {

@@ -3,7 +3,7 @@ module.exports = {
     aliases: ["blacklist", "bl", "ignoreuser"],
     description: "This command bans the specified user from using the bot commands and logging the reason.",
     permissionsBot: [],
-    permissionsUser: ["BOT_DESIGNER"],
+    permissionsUser: ["DEVELOPER"],
     channels: ["text", "dm"],
     cooldown: 1,
     usage: "blacklist [user] [reason]",
@@ -26,7 +26,7 @@ module.exports = {
                 console.log(`There are no blacklisted users at this time.`, users);
             }
         } catch (e) {
-            return base.utils.noArgsFound(msg, prefix, cmd, 5);
+            return base.utils.noArgsFound(msg, prefix, this, 5);
         }
     }
 };

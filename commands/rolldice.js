@@ -1,12 +1,12 @@
 module.exports = {
 	name: "rolldice",
 	aliases: ["rolldice", "dice", "roll"],
-	description: "This command will ask the bot to roll a die or dice and return the result.",
+	description: "This command will ask the bot to roll a die or dice and return the result. (max of 10 dice, max of 100 sides)",
 	permissionsBot: [],
 	permissionsUser: [],
 	channels: ["text", "dm"],
 	cooldown: 1,
-	usage: "rolldice [number]d[number]",
+	usage: "rolldice [number of dice]d[number of sides]",
 	examples: ["rolldice", "rolldice 5", "rolldice 4d20"],
 	enable: true,
 	deleteCmd: -1,
@@ -32,7 +32,7 @@ module.exports = {
 			}
 			let sum = valArray.reduce((total, current) => current += total);
 			let average = Math.round(sum / valArray.length * 100) / 100;
-			base.utils.sendEmbed(msg, `Your rolls are \`${valArray.join(", ")}\` \n The sum is **${sum}** and the average is **${average}**.`);
+			base.utils.sendEmbed(msg, `Your rolls are: \`${valArray.join(", ")}\`\nThe sum is **${sum}** and the average is **${average}**.`);
 		} catch (err) {
 			return base.utils.noArgsFound(msg, prefix, this);
 		}

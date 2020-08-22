@@ -12,29 +12,42 @@ module.exports = {
 	deleteCmd: 0,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
+		//check for roles and reason
 	    if (args.length < 2) {
 	    	return base.utils.noArgsFound(msg, prefix, this, 5);
 	    }
-	    let role = msg.guild.roles.find(r => args[0].toLowerCase().includes(r.name.toLowerCase()));
-		let reasonFor = args.slice(1).join(" ");
+
+		//assume that the role is specified
+		var role = msg.mentions.roles.first();
+		var reasonFor = args.join(" ");
+
+		//otherwise the role name should be the first args
+		if (!role) {
+			role = msg.guild.roles.find(r => args[0].toLowerCase().includes(r.name.toLowerCase()));
+			reasonFor = args.slice(1).join(" ");
+		}
+
+		// if no role return no args found
 	    if (!role) {
 	    	return base.utils.noArgsFound(msg, prefix, this, 5);
 	    }
+
+		// send request to modlog
 	    msg.guild.channels.find(c => c.name == "mod_log").send({
-    embed: {
-        color: 7013119,
-        author: {
-            name: msg.author.username,
-            icon_url: msg.author.avatarURL
-        },
-        title: "Role Application",
-        description: `${msg.author} has applied for the **${role.name}** Role`,
-        fields: [{
-            name: "Reason",
-            value: reasonFor
-        }],
-        timestamp: new Date()
-    }
-}).catch(console.error);
+		    embed: {
+		        color: 7013119,
+		        author: {
+		            name: msg.author.username,
+		            icon_url: msg.author.avatarURL
+		        },
+		        title: "Role Application",
+		        description: `${msg.author} has applied for the **${role.name}** Role`,
+		        fields: [{
+		            name: "Reason",
+		            value: reasonFor
+		        }],
+		        timestamp: new Date()
+		    }
+		}).catch(console.error);
 	}
 };

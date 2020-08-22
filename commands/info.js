@@ -12,18 +12,18 @@ module.exports = {
 	deleteCmd: 0,
 	deleteResp: 10,
 	execute(base, prefix, msg, args) {
-		if (base.args.length == 0) {
-			return base.utils.noArgsFound(base);
-		} else if (base.args[1].toString().toLowerCase() == 'server') {
+		if (args.length == 0) {
+			return base.utils.noArgsFound(msg, prefix, this);
+		} else if (args[0].toString().toLowerCase() == 'server') {
 			let guild = msg.channel.guild;
 			let botCount = guild.members.filter(mem => mem.user.bot).array().length;
 			msg.channel.send({
 				embed: {
 			  		color: 262088,
 			  		title: `Server info for ${guild.name}`,
-			  		description: `**Guild Id:** ${guild.id}\n` +
+			  		description: `**Guild ID:** ${guild.id}\n` +
 						`**Created:** ${new Date(guild.createdAt).toUTCString()}\n` +
-						`**Owner:** ${guild.owner.displayName}\n` +
+						`**Owner:** ${guild.owner.user.tag}\n` +
 						`**Members:** ${guild.members.size - botCount} **Bots:** ${botCount}\n` +
 						`**Icon URL:** ${guild.iconURL}`,
 			  		thumbnail: {
@@ -32,10 +32,10 @@ module.exports = {
 			  		timestamp: new Date()
 				}
 		  	});
+			if(base.debug) consoele.log(guild);
 		} else {
 			try {
-				let user = base.args[0].toString().toLowerCase() == 'bot' ? base.bot.user : msg.mentions.users.first();
-				if (base.debug) console.log(user);
+				let user = args[0].toString().toLowerCase() == 'bot' ? base.bot.user : msg.mentions.users.first();
 				msg.channel.send({
 					embed: {
 						color: 3447003,
@@ -52,9 +52,10 @@ module.exports = {
 						timestamp: new Date()
 		  			}
 				});
+				if (base.debug) console.log(user);
 		  	} catch (e) {
-				console.log(e);
-				return base.utils.noArgsFound(base);
+				if (base.debug) console.log(e);
+				return base.utils.noArgsFound(msg, prefix, this);
 		  	}
 		}
 	}

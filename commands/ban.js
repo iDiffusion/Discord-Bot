@@ -13,12 +13,11 @@ module.exports = {
     deleteResp: -1,
     execute(base, prefix, msg, args) {
         if (args.length < 2) {
-            base.utils.noArgsFound(msg, prefix, this, 5);
-            return;
+            return base.utils.noArgsFound(msg, prefix, this, 5, 16721408);
         }
         let userToBan = msg.mentions.users.first();
         if (!userToBan) {
-            return base.utils.noArgsFound(msg, prefix, this, 5);
+            return base.utils.noArgsFound(msg, prefix, this, 5, 16721408);
         }
         if (userToBan.hasPermission('ADMINISTRATOR')) {
             return base.utils.sendEmbed(msg, `Im sorry to inform you but you are unable to ban your equals.`, 5);
@@ -26,7 +25,7 @@ module.exports = {
         let banMsg = args.slice(1).join(" ");
         base.utils.sendActionToDM(msg, "Banned", 16721408, userToBan, banMsg);
         base.utils.sendActionToModlog(msg, "Banned", 16721408, userToBan, banMsg);
-        msg.guild.member(userToBan).ban().catch(console.error);
+        msg.guild.member(userToBan).ban();
         base.bot.usersRemoved.push(userToBan);
     }
 };
