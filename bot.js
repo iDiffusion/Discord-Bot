@@ -44,14 +44,16 @@ bot.on('resume', () => {
 });
 bot.on('ready', () => {
     console.log('Celestial is ready to serve!');
-    if ( debug ) {
+    if (debug) {
         bot.user.setActivity('with code');
     } else {
         var num = Math.floor(Math.random() * auth.messages.length);
         var message = auth.messages[num]
-            .replace(/<users>/gi, bot.users.array().length)
-            .replace(/<servers>/gi, bot.guilds.array().length);
-        bot.user.setActivity(message, { type: 'LISTENING'}).catch(console.error);
+            .replace(/<users>/gi, bot.users.cache.array().length)
+            .replace(/<servers>/gi, bot.guilds.cache.array().length);
+        bot.user.setActivity(message, {
+            type: 'LISTENING'
+        }).catch(console.error);
     }
 });
 
@@ -122,14 +124,14 @@ bot.on("message", msg => {
     const cmd = bot.commands.get(cmdName) || bot.commands.find(command => command.aliases && command.aliases.includes(cmdName));
     if (!cmd) return;
 
+    // delete command if specified
+    if (msg.channel.type == "text" && cmd.deleteCmd == 0) msg.delete().catch(console.error);
+    else if (msg.channel.type == "text" && cmd.deleteCmd > 0) msg.delete({ timeout: cmd.deleteCmd * 1000, reason: 'delete timer' }).catch(console.error);
+
     // ensure command works in channel
     if (!cmd.channels.includes(msg.channel.type)) {
         return utils.sendEmbed(msg, `The \"${cmd.name}\" command is currently unavailable in ${msg.channel.type == 'text'? "text channels" : "direct messages"}. I appologize for the incovenience.`);
     }
-
-    // delete command if specified
-    if (msg.channel.type == "text" && cmd.deleteCmd == 0) msg.delete().catch(console.error);
-    else if (msg.channel.type == "text" && cmd.deleteCmd > 0) msg.delete(cmd.deleteCmd * 1000).catch(console.error);
 
     // check if command is enabled
     if (!cmd.enable) {
@@ -148,9 +150,10 @@ bot.on("message", msg => {
 
         // check if modlog exist
         try {
-            if (!msg.guild.channels.find(x => x.name == "mod_log")) {
-                msg.guild.createChannel('mod_log', {
+            if (!msg.guild.channels.cache.find(x => x.name == "mod_log")) {
+                msg.guild.channels.create('mod_log', {
                     type: 'text',
+                    topic: 'This is where the server feeds is posted.',
                     permissionOverwrites: [{
                         id: msg.guild.id,
                         deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
@@ -162,15 +165,14 @@ bot.on("message", msg => {
                     }]
                 });
             } else {
-                msg.guild.channels.find(x => x.name == "mod_log").overwritePermissions(msg.guild.me.user, {
-                    SEND_MESSAGES: true,
-                    VIEW_CHANNEL: true,
-                    EMBED_LINKS: true
-                });
+                msg.guild.channels.cache.find(x => x.name == "mod_log").overwritePermissions([{
+                    id: msg.guild.me.id,
+                    allow: ['SEND_MESSAGES','VIEW_CHANNEL','EMBED_LINKS']
+                }]);
             }
         } catch (err) {
             console.error(err);
-            msg.reply('There was an error trying to execute that command!');
+            msg.reply('Unable to create/find mod_log. Please try again later.');
         }
 
         // check bot permissions to use command
@@ -207,12 +209,12 @@ bot.on("guildMemberAdd", mem => {
         var msgToSend = server.WelcomePM.replace(/##SERVER##/gi, mem.guild.name).replace(/##USER##/gi, mem.user).replace(/##USERNAME/gi, mem.user.username);
         mem.user.sendMessage(msgToSend).catch(console.error);
     }
-	if (server.WelcomeChannel && server.WelcomeMsg) {
+    if (server.WelcomeChannel && server.WelcomeMsg) {
         var msgToSend = server.WelcomeMsg.replace(/##SERVER##/gi, mem.guild.name).replace(/##USER##/gi, mem.user).replace(/##USERNAME/gi, mem.user.username);
         var chanToSend = mem.guild.channels.find(chan => chan.id = server.WelcomeChannel)
-		if (chanToSend) {
-			chanToSend.send(msgToSend).catch(console.error).catch(console.error);
-		}
+        if (chanToSend) {
+            chanToSend.send(msgToSend).catch(console.error).catch(console.error);
+        }
     }
     var channel = guild.channels.find(x => x.name == "mod_log");
     channel.send({
@@ -281,17 +283,17 @@ bot.on("guildBanRemove", (guild, mem) => {
             timestamp: new Date()
         }
     }).catch(console.error);
-	bot.usersRemoved = bot.usersRemoved.filter(m => m.id != mem.id);
+    bot.usersRemoved = bot.usersRemoved.filter(m => m.id != mem.id);
 });
 
 bot.on("guildCreate", guild => {
     console.log(`New guild added: ${guild}.`);
-	mysql.log('Invited to new guild', 0, JSON.parse(guild));
+    mysql.log('Invited to new guild', 0, JSON.parse(guild));
 });
 
 bot.on("guildDelete", guild => {
     console.log(`Old guild left/deleted: ${guild}.`);
-	mysql.log('Removed from guild', 0, JSON.parse(guild));
+    mysql.log('Removed from guild', 0, JSON.parse(guild));
 });
 
 bot.on("guildMemberUpdate", (oldMem, newMem) => {

@@ -15,7 +15,7 @@ module.exports = {
         if (args.length < 2) {
             return base.utils.noArgsFound(msg, prefix, this, 3, 16733186);
         }
-		let userToKick = msg.mentions.users.first();
+		let userToKick = msg.mentions.members.first();
         if (!userToKick) {
             return base.utils.noArgsFound(msg, prefix, this, 5, 16733186);
         }

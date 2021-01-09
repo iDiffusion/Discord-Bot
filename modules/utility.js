@@ -41,7 +41,7 @@ exports.sendToModlog = (msg, message) => {
 
 exports.sendActionToModlog = (msg, action, color, user, message) => {
     try {
-        msg.guild.channels.find(c => c.name == "mod_log").send({
+        msg.guild.channels.cache.find(c => c.name == "mod_log").send({
             embed: {
                 color: color,
                 author: {
@@ -103,7 +103,7 @@ exports.sendEmbed = (msg, message, timer) => {
         }
     }).then(msgs => {
         if (timer && timer > 0) {
-            msgs.delete(timer * 1000);
+            msgs.delete({timeout: timer * 1000, reason: 'delete timer'});
         }
     }).catch(console.error);
 };
@@ -114,9 +114,9 @@ exports.sendEmbed = (msg, message, timer, color) => {
             color: color || 3447003,
             description: message
         }
-    }).then(msgs => {
+    }).then(message => {
         if (timer && timer > 0) {
-            msgs.delete(timer * 1000);
+            message.delete({timeout: timer * 1000, reason: 'delete timer'});
         }
     }).catch(console.error);
 };
@@ -171,4 +171,13 @@ exports.sample = (array) => {
     let index = Math.floor(Math.random() * length);
     if( index >= length ) index = length - 1;
     return array[index];
+}
+
+exports.getMethods = (obj) => {
+  let properties = new Set()
+  let currentObj = obj
+  do {
+    Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+  } while ((currentObj = Object.getPrototypeOf(currentObj)))
+  console.log([...properties.keys()].filter(item => typeof obj[item] === 'function'));
 }

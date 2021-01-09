@@ -23,7 +23,7 @@ module.exports = {
 
 		//otherwise the role name should be the first args
 		if (!role) {
-			role = msg.guild.roles.find(r => args[0].toLowerCase().includes(r.name.toLowerCase()));
+			role = msg.guild.roles.cache.find(r => args[0].toLowerCase().includes(r.name.toLowerCase()));
 			reasonFor = args.slice(1).join(" ");
 		}
 
@@ -33,7 +33,7 @@ module.exports = {
 	    }
 
 		// send request to modlog
-	    msg.guild.channels.find(c => c.name == "mod_log").send({
+	    msg.guild.channels.cache.find(c => c.name == "mod_log").send({
 		    embed: {
 		        color: 7013119,
 		        author: {

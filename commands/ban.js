@@ -15,7 +15,7 @@ module.exports = {
         if (args.length < 2) {
             return base.utils.noArgsFound(msg, prefix, this, 5, 16721408);
         }
-        let userToBan = msg.mentions.users.first();
+        let userToBan = msg.mentions.members.first();
         if (!userToBan) {
             return base.utils.noArgsFound(msg, prefix, this, 5, 16721408);
         }
