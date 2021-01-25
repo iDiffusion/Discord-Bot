@@ -25,7 +25,7 @@ module.exports = {
         let kickMsg = args.slice(1).join(" ");
         base.utils.sendActionToDM(msg, "Kicked", 16733186, userToKick, kickMsg);
         base.utils.sendActionToModlog(msg, "Kicked", 16733186, userToKick, kickMsg);
-        msg.guild.member(userToKick).kick();
+        msg.guild.member(userToKick).kick(kickMsg);
         base.usersRemoved.push(userToKick);
     }
 };

@@ -17,10 +17,10 @@ module.exports = {
 			return base.utils.noArgsFound(msg, prefix, this, 5);
 		}
 		args.splice(flag, 1);
-		base.bot.guilds.map( guild => {
-			let channel = guild.channels.find(x => x.name == "mod_log");
-			channel = channel || guild.channels.find(x => x.name == "general");
-			channel = channel || guild.channels[0];
+		base.bot.guilds.cache.map( guild => {
+			let channel = guild.channels.cache.find(x => x.name == "mod_log");
+			channel = channel || guild.channels.cache.find(x => x.name == "general");
+			channel = channel || guild.channels.cache.array()[0];
 			channel.send({
 				embed: {
 					color: 3447003,

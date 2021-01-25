@@ -12,6 +12,13 @@ module.exports = {
 	deleteCmd: 0,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
-    	//TODO write restart command
+		msg.channel.send({
+			embed: {
+			  color: 3447003,
+			  description: 'Resetting...'
+			}
+		  })
+		  .then(msg => base.bot.destroy())
+		  .then(() => base.bot.login(base.auth.token));
 	}
 };

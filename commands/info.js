@@ -9,14 +9,14 @@ module.exports = {
 	usage: "info [server|user|bot]",
 	examples: ["info", "info server", "info @pyro"],
 	enable: true,
-	deleteCmd: 0,
+	deleteCmd: 5,
 	deleteResp: 10,
 	execute(base, prefix, msg, args) {
 		if (args.length == 0) {
 			return base.utils.noArgsFound(msg, prefix, this);
 		} else if (args[0].toString().toLowerCase() == 'server') {
 			let guild = msg.channel.guild;
-			let botCount = guild.members.filter(mem => mem.user.bot).array().length;
+			let botCount = guild.members.cache.filter(mem => mem.user.bot).size;
 			msg.channel.send({
 				embed: {
 			  		color: 262088,
@@ -24,15 +24,15 @@ module.exports = {
 			  		description: `**Guild ID:** ${guild.id}\n` +
 						`**Created:** ${new Date(guild.createdAt).toUTCString()}\n` +
 						`**Owner:** ${guild.owner.user.tag}\n` +
-						`**Members:** ${guild.members.size - botCount} **Bots:** ${botCount}\n` +
-						`**Icon URL:** ${guild.iconURL}`,
+						`**Members:** ${guild.members.cache.size - botCount} **Bots:** ${botCount}\n` +
+						`**Icon URL:** ${guild.iconURL()}`,
 			  		thumbnail: {
-						url: guild.iconURL
+						url: guild.iconURL()
 			  		},
 			  		timestamp: new Date()
 				}
 		  	});
-			if(base.debug) consoele.log(guild);
+			if(base.debug) console.log(guild);
 		} else {
 			try {
 				let user = args[0].toString().toLowerCase() == 'bot' ? base.bot.user : msg.mentions.users.first();
@@ -45,9 +45,9 @@ module.exports = {
 							`**Discriminator:** ${user.discriminator}\n` +
 							`**Created:** ${new Date(user.createdAt).toUTCString()}\n` +
 							`**Joined:** ${new Date(msg.guild.member(user).joinedTimestamp).toUTCString()}\n` +
-							`**Avatar URL:** ${user.avatarURL}`,
+							`**Avatar URL:** ${user.avatarURL()}`,
 							thumbnail: {
-			  					url: user.avatarURL
+			  					url: user.avatarURL()
 							},
 						timestamp: new Date()
 		  			}

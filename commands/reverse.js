@@ -12,7 +12,9 @@ module.exports = {
 	deleteCmd: -1,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
-    	//TODO write reverse command
-		}
+		if (args.length == 0) return base.utils.noArgsFound(msg, prefix, this);
+		let letters = args.join(" ").split("");
+		letters.reverse();
+		base.utils.sendEmbed(msg, `Your message reversed is **${letters.join("")}**.`);
 	}
 };

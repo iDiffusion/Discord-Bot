@@ -4,6 +4,7 @@ module.exports = {
     description: "This command creates a channel used for “Storytime with Mr.Z”, aka Zeadron, as he develops his new book.",
     permissionsBot: ["MANAGE_CHANNELS", "MOVE_MEMBERS"],
     permissionsUser: ["MOVE_MEMBERS"],
+    servers: ["212624757818916864"],
     channels: ["text", "dm"],
     cooldown: 1,
     usage: "prisolis",
@@ -12,24 +13,21 @@ module.exports = {
     deleteCmd: -1,
     deleteResp: -1,
     execute(base, prefix, msg, args) {
-		console.log( base.utils.getMethods(msg.guild));
         let channelName = "Story Time w/ Mr.Z";
         //if (base.msg.guild.id != 212624757818916864) return;
         if (msg.author.id != 222883669377810434 && !msg.member.hasPermission('ADMINISTATOR')) {
             return base.utils.unauthorizedUser(base);
         }
-        let storyTime = msg.guild.channels.find(c => c.name == channelName);
+        let storyTime = msg.guild.channels.cache.find(c => c.name == channelName);
         if (!storyTime) {
-            msg.guild.createChannel(channelName, {
+            msg.guild.channels.create(channelName, {
                     type: 'voice',
                     permissionOverwrites: [{
                         id: msg.guild.id,
-                        deny: [],
-                        allow: ["CREATE_INSTANT_INVITE", "VIEW_CHANNEL", "CONNECT", "SPEAK"]
+                        allow: ['CREATE_INSTANT_INVITE', 'VIEW_CHANNEL', 'CONNECT', 'SPEAK']
                     }, {
                         id: 222883669377810434,
-                        deny: [],
-                        allow: ["MOVE_MEMBERS", "PRIORITY_SPEAKER", "MUTE_MEMBERS", "USE_VAD"]
+                        allow: ['MOVE_MEMBERS', 'PRIORITY_SPEAKER', 'MUTE_MEMBERS', 'USE_VAD']
                     }]
                 })
                 .then(console.log)
@@ -38,7 +36,7 @@ module.exports = {
         } else {
             let mem_array = storyTime.members.array();
             try {
-                let moveToChannel = msg.guild.channels.find("name", "General");
+                let moveToChannel = msg.guild.channels.cache.find("name", "General");
                 if (!moveToChannel) {
                     throw "No General Chat";
                 }

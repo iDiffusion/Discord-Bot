@@ -13,6 +13,7 @@ const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 bot.cooldowns = new Discord.Collection();
 bot.usersRemoved = new Discord.Collection();
+bot.cmdqueue = new Discord.Collection();
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {

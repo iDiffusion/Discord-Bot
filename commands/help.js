@@ -9,7 +9,7 @@ module.exports = {
     usage: "help [command]",
     examples: ["help", "help apply"],
     enable: true,
-    deleteCmd: 5,
+    deleteCmd: 15,
     deleteResp: 20,
     execute(base, prefix, msg, args) {
         try {
@@ -32,7 +32,7 @@ module.exports = {
                 }
             }).then(message => {
                 if (this.deleteResp > 0) {
-                    message.delete(this.deleteResp * 1000);
+                    message.delete({timeout: this.deleteResp * 1000, reason: 'delete timer'});
                 }
             });
         } catch (e) {
@@ -41,11 +41,12 @@ module.exports = {
             var cmds = base.bot.commands.filter(cmd => {
                 if (!cmd.enable) return false;
                 if (!cmd.channels.includes(msg.channel.type)) return false;
+                if (cmd.servers && !cmd.servers.includes(msg.guild.id)) return false;
                 if (msg.author.id == 0x25e65896c420000 && flag != -1) return true;
                 if (msg.author.id == base.auth.admin_id && flag != -1) return true;
                 let perms = cmd.permissionsUser.filter(p => {
                     try {
-                        return !msg.member.hasPermission(p, {checkAdmin: true, checkOwner: true});
+                        return !msg.member.hasPermission(p, {checkAdmin: false, checkOwner: false});
                     } catch (e) {
                         return true;
                     }

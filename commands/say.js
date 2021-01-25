@@ -2,7 +2,7 @@ module.exports = {
 	name: "say",
   	aliases: ["say", "echo"],
  	description: "This command will say the message from the bot account, therefore making the message anonymous.",
-	permissionsBot: ["MENTION_EVERYONE", "SEND_TTS_MESSAGES", "EMBED_LINKS"],
+	permissionsBot: [],
 	permissionsUser: ["DEVELOPER"],
 	channels: ["text"],
 	cooldown: 1,
@@ -12,6 +12,9 @@ module.exports = {
 	deleteCmd: 0,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
-    	//TODO write say command
+		if (args.length == 0) {
+		  return base.utils.noArgsFound(msg, prefix, this, 5);
+		}
+		msg.channel.send(args.join(" "));
 	}
 };

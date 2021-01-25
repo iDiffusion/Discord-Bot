@@ -12,6 +12,12 @@ module.exports = {
 	deleteCmd: 0,
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
-    	//TODO write shutdown command
+		msg.channel.send({
+			embed: {
+			  color: 3447003,
+			  description: 'Shutting Down...'
+			}
+		})
+		.then(msg => base.bot.destroy());
 	}
 };
