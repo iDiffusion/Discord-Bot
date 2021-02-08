@@ -158,7 +158,7 @@ exports.checkUserPerms = (base, cmd, member) => {
     if (cmd.permissionsUser.length == 0) return [];
     let perms = cmd.permissionsUser.filter(p => {
         try {
-            return !member.hasPermission(p);
+            return !member.hasPermission(p, {checkAdmin: false, checkOwner: false});
         } catch (e) {
             return true;
         }

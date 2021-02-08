@@ -13,7 +13,7 @@ module.exports = {
 	deleteResp: -1,
 	execute(base, prefix, msg, args) {
 		msg.channel.send('Pong!')
-		.then( newMsg => newMsg.edit(`Pong! \`${Math.ceil(base.bot.ping)}ms\``))
+		.then( oldMsg => oldMsg.edit(`Pong! \`${Math.ceil(base.bot.ws.ping)}ms\``))
 		.catch(console.error);
 	}
 };

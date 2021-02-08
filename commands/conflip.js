@@ -14,6 +14,6 @@ module.exports = {
 	execute(base, prefix, msg, args) {
 		let choices = ["Head", "Tail"];
 	    let result = base.utils.sample(choices);
-	    base.sendEmbed(msg,`Result is ${result}.`);
+	    base.utils.sendEmbed(msg,`Result is ${result}.`);
 	}
 };

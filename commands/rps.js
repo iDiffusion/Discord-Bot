@@ -15,7 +15,7 @@ module.exports = {
 		if (args.length == 0) return base.utils.noArgsFound(msg, prefix, this);
 		let userChoice = args[0].toLowerCase();
 		let choices = ["rock", "paper", "scissors"];
-		let computerChoice = underscore.sample(choices);
+		let computerChoice = base.utils.sample(choices);
 		userChoice = choices.indexOf(userChoice) != -1 ? userChoice : "default";
 		let compare = function(choice1, choice2) {
 		  let rock = {
@@ -41,7 +41,7 @@ module.exports = {
 		  else if (choice1 == "paper") return paper[choice2];
 		  else return `You did not define an argument. Usage: \`${base.PREFIX + base.cmd.format}\``;
 		};
-		let message = compare(computerChoice, userChoice).replace("$user", base.msg.author.username).replace("$bot", base.bot.user.username);
-		base.utils.sendEmbed(msg, messsage);
+		let message = compare(computerChoice, userChoice).replace("$user", msg.author.username).replace("$bot", base.bot.user.username);
+		base.utils.sendEmbed(msg, message);
 	}
 };

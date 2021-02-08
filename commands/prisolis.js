@@ -23,29 +23,29 @@ module.exports = {
             msg.guild.channels.create(channelName, {
                     type: 'voice',
                     permissionOverwrites: [{
-                        id: msg.guild.id,
-                        allow: ['CREATE_INSTANT_INVITE', 'VIEW_CHANNEL', 'CONNECT', 'SPEAK']
+                        'id': msg.guild.id,
+                        'allow': ['CREATE_INSTANT_INVITE', 'VIEW_CHANNEL', 'CONNECT', 'SPEAK']
                     }, {
-                        id: 222883669377810434,
-                        allow: ['MOVE_MEMBERS', 'PRIORITY_SPEAKER', 'MUTE_MEMBERS', 'USE_VAD']
+                        'id': 222883669377810434,
+                        'allow': ['MOVE_MEMBERS', 'PRIORITY_SPEAKER', 'MUTE_MEMBERS', 'USE_VAD']
                     }]
                 })
-                .then(console.log)
-                .catch(console.error);
-            return `Voice channel named \`${channelName}\` has been created. Use \`?prisolis\` to delete the channel after use.`;
+                .then(console.log);
+            base.utils.sendEmbed(msg, `Voice channel named \`${channelName}\` has been created. Use \`?prisolis\` to delete the channel after use.`);
         } else {
             let mem_array = storyTime.members.array();
             try {
                 let moveToChannel = msg.guild.channels.cache.find("name", "General");
                 if (!moveToChannel) {
-                    throw "No General Chat";
+                    throw "No General Chat Found";
                 }
                 mem_array.map(id => msg.guild.member(id).setVoiceChannel(moveToChannel).catch(console.error));
             } catch (e) {
+                console.error(e);
                 //TODO move to first voice channel
             }
             storyTime.delete().catch(console.error);
-            return `Voice channel named \`${channelName}\` has been deleted.`;
+            base.utils.sendEmbed(msg, `Voice channel named \`${channelName}\` has been deleted.`);
         }
     }
 };
